@@ -1,0 +1,25 @@
+body {
+  background-color: var(--background)
+}
+
+/**
+ * Waving hand at the top of the page.
+ * Just a bit of CSS to make it go back/forth
+ */
+#handWave {
+  animation: 3s infinite handwave;
+}
+
+@keyframes handwave {
+  from {
+    rotate: 0.0turn
+  }
+
+  50% {
+    rotate: -0.2turn
+  }
+
+  to {
+    rotate: 0.0turn
+  }
+}

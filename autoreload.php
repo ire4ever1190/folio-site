@@ -11,7 +11,9 @@ header("Content-Type: text/event-stream");
 // Should I just glob it?
 $files = [
   "index.php" => 0,
-  "meta.php" => 0
+  "meta.php" => 0,
+  "css/components.css" => 0,
+  "css/main.css" => 0
 ];
 
 while (true) {

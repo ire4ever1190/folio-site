@@ -1,0 +1,12 @@
+/**
+ * Variables used across the site are stored here
+ */
+
+:root {
+  --background: #BFCDCC;
+  --text: black;
+  --primary: #608F98;
+  --secondary: #A4B472;
+  --accent: #A4B472;
+  --grabby: #803841
+}

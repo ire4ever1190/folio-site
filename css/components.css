@@ -1,0 +1,10 @@
+/**
+ * Stored in here is components like cards n stuff
+ */
+
+.card {
+  background-color: var(--primary);
+  border-radius: 1em;
+  padding: .3em;
+}
+
