@@ -35,11 +35,9 @@ while (true) {
   if ($needsReload) {
     echo "event: reload\ndata:\n\n";
   }
-  while (ob_get_level() > 0) {
-    ob_end_flush();
-  }
+  ob_flush();
   flush();
 
-  if (connection_aborted()) break;
+  if (connection_aborted()) exit();
   sleep(1);
 }

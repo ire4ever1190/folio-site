@@ -16,7 +16,7 @@ site/%.html: %.php
 	@mkdir -p site/css
 	php $< > $@
 
-site/%.css: %.css site/
+site/%.css: %.css
 	@# TODO: Optimise the CSS
 	@# Maybe also combine all the CSS into one file?
 	@mkdir -p site/css

@@ -1,5 +1,20 @@
+@font-face {
+  font-family: "Slabo";
+  src:
+    local("Slabo"), url("slabo.ttf") format("opentype")
+}
+
 body {
+  font-family: "Slabo";
   background-color: var(--background)
+}
+
+h1 {
+  font-size: 4em;
+}
+
+p {
+  font-size: 1.4em;
 }
 
 /**

@@ -16,7 +16,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Build site 🔨🧑‍🔧
-        run: make build
+        run: make -j2 build
 
       - name: Fix permissions 🏥
         run: |

@@ -3,6 +3,18 @@
  * on random elements
  */
 
+/**
+ * Generic class to make an item be centered.
+ * Parent must have some sized defined though
+ */
 .centre {
   margin: 0 auto;
+}
+
+/**
+ * Aligns text in the centre. Will make it work
+ * for other stuff in future
+ */
+.align-centre {
+  text-align: center;
 }
