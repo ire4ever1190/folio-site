@@ -6,15 +6,12 @@
 
 body {
   font-family: "Slabo";
-  background-color: var(--background)
+  background-color: var(--background);
+  font-size: 1.4em;
 }
 
 h1 {
   font-size: 4em;
-}
-
-p {
-  font-size: 1.4em;
 }
 
 /**

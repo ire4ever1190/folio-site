@@ -18,3 +18,12 @@
 .align-centre {
   text-align: center;
 }
+
+/*
+ * Series of margin style utilities since I like using
+ * them in most CSS frameworks
+ */
+
+.mt1 {
+  margin-top: 1em;
+}

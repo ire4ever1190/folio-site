@@ -12,3 +12,4 @@ Deploying can be done via `make build`. Requires [closure compiler](https://gith
 
 ### Attribution
 - [Mutant Remix](https://mutant.revolt.chat/) by Revolt chat is used for the emojis
+- [Tabler Icons](https://tabler-icons.io/) for the icons
