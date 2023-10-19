@@ -42,4 +42,4 @@ clean:
 	rm -rf site
 
 serve: ## Development server
-	php -S 127.0.0.1:8080
+	PHP_CLI_SERVER_WORKERS=4 php -S 127.0.0.1:8080

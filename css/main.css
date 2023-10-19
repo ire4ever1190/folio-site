@@ -4,14 +4,23 @@
     local("Slabo"), url("slabo.ttf") format("opentype")
 }
 
+/**
+ * Default styling of built in components
+ */
+
 body {
-  font-family: "Slabo";
+  font-family: "Slabo", serif;
   background-color: var(--background);
   font-size: 1.4em;
 }
 
 h1 {
   font-size: 4em;
+}
+
+a:any-link {
+  color: inherit;
+  text-decoration-color: var(--grabby);
 }
 
 /**
