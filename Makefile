@@ -13,7 +13,7 @@ CSS_FILES := $(CSS:%.css=site/%.css)
 
 
 site/%.html: %.php
-	@mkdir -p site/css
+	@mkdir -p site/
 	php $< > $@
 
 site/%.css: %.css
@@ -22,10 +22,13 @@ site/%.css: %.css
 	@mkdir -p site/css
 	cp $< $@
 
+site/favicon.svg: favicon.php
+	@mkdir -p site/
+	php $< > $@
 
 pages: $(HTML_FILES)
 
-build: pages $(JS_FILES) $(CSS_FILES)
+build: pages $(JS_FILES) $(CSS_FILES) site/favicon.svg
 	cp -r scripts site/
 	cp -r css site/
 	cp -r imgs site/

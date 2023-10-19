@@ -1,4 +1,5 @@
 <?php
+require_once "utils.php";
 
 $PROPERTIES = [
   // Basic metadata
@@ -20,3 +21,5 @@ $PROPERTIES = [
 foreach ($PROPERTIES as $name => $content) {
   echo "<meta name='$name' content=\"$content\" />";
 }
+?>
+<link rel="icon" href="<?= makePHP("/favicon.svg") ?>" type="image/svg+xml" sizes="any">
