@@ -46,6 +46,7 @@ const SOCIALS = [
     </div>
 </section>
 <section class="card centre mt1" style="width: 30vw">
+    <h2>About Me</h2>
     <p>I enjoy most programming (my lack of design skills makes me hate frontend a lil 😔). But I still do it because the
         web is pretty neat</p>
     <p>I do CS at RMIT (TODO: make this past tense when I graduate) and during that time have worked with lots of
