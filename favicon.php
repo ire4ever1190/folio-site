@@ -27,24 +27,6 @@ function turn(int $angle, int $degrees): int {
 const RULES = ["A-B--B+A++AA+B-", "+A-BB--B-A++A+B"];
 
 /**
- * Performs linear interpolation between two colours
- * @param array<int> $a First colour
- * @param array<int> $b Second colour
- * @param float $frac Value between 0-1 that is the amount to iterpolate
- * @return array<int> Interpolated colour
- */
-function lerp_col(array $a, array $b, float $frac): array {
-    $lerp = function (int $i) use ($a, $b, $frac): float {
-        return ($b[$i] - $a[$i]) * $frac + $a[$i];
-    };
-    return [
-        $lerp(0),
-        $lerp(1),
-        $lerp(2)
-    ];
-}
-
-/**
  * Converts an [R, G, B] array into a hex string
  * @param array<int> $colour RGB values to convert
  * @see https://stackoverflow.com/a/32977705/21247938

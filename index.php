@@ -12,13 +12,27 @@ const SOCIALS = [
 
 
 ?>
-<html>
+<!doctype html>
+<html lang="en">
 <head>
     <?php include 'meta.php' ?>
     <title>Teehee</title>
-    <?php foreach (CSS_FILES as $file): ?>
-        <link rel='stylesheet' href='css/<?= $file ?>'/>
-    <?php endforeach ?>
+    <?php if (IS_DEBUG): ?>
+        <!-- Load each style sheet when developing -->
+        <?php foreach (CSS_FILES as $file): ?>
+            <link rel='stylesheet' href='css/<?= $file ?>'/>
+        <?php endforeach ?>
+    <?php else: ?>
+        <!-- Load single minified sheet in production -->
+        <!-- Not minified yet, but this saves loading multiple sheets -->
+        <link rel="stylesheet" href="css/site.css"/>
+        <!--
+            Should minimise time before text is shown.
+            Should maybe also use the swap? So that the
+            font is just swapped in
+        -->
+        <link rel="preload" href="css/slabo.ttf" as="font"/>
+    <?php endif ?>
 </head>
 <body>
 <section class="card centre" style="width: 10vw">

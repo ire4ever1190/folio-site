@@ -1,34 +1,32 @@
 
-.PHONY: pages serve
+.PHONY: pages serve clean build
 
 # Inputs
 PAGES  := index.php
 JS := $(shell find scripts/ -not -name reload.js)
-CSS := $(shell find css/)
+CSS := $(shell find css/ -name "*.css")
 
 # Outputs
 HTML_FILES := $(PAGES:%.php=site/%.html)
 JS_FILES := $(JS:%.js=site/%.js)
-CSS_FILES := $(CSS:%.css=site/%.css)
 
+site/:
+	mkdir -p site/
 
-site/%.html: %.php
-	@mkdir -p site/
+site/%.html: %.php site/
 	php $< > $@
 
-site/%.css: %.css
+site/css/site.css: $(CSS)
 	@# TODO: Optimise the CSS
-	@# Maybe also combine all the CSS into one file?
 	@mkdir -p site/css
-	cp $< $@
+	cat $^ > $@
 
-site/favicon.svg: favicon.php
-	@mkdir -p site/
+site/favicon.svg: favicon.php site/
 	php $< > $@
 
 pages: $(HTML_FILES)
 
-build: pages $(JS_FILES) $(CSS_FILES) site/favicon.svg
+build: site/ pages $(JS_FILES) $(CSS_FILES) site/favicon.svg site/css/site.css
 	cp -r scripts site/
 	cp -r css site/
 	cp -r imgs site/
