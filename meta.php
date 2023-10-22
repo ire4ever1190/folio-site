@@ -14,7 +14,8 @@ $PROPERTIES = [
   "og:image" => "https://leahy.dev/imgs/construction.png",
   "og:image:width" => "1000",
   "og:image:height" => "1000",
-  "og:image:alt" => "Bunch of random emojis surronding text saying 'under construction'"
+  "og:image:alt" => "Bunch of random emojis surronding text saying 'under construction'",
+  "og:description" => "A random site with random stuff (about Jake (Me))"
 ];
 
 // Render all the metatags
