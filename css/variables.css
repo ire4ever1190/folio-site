@@ -8,5 +8,8 @@
   --primary: #608F98;
   --secondary: #A4B472;
   --accent: #A4B472;
-  --grabby: #803841
+  --grabby: #803841;
+  /* Spoiler colours from discord */
+  --spoiler-hidden: #1e1f22;
+  --spoiler-shown: #46484c;
 }

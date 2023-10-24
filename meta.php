@@ -23,4 +23,5 @@ foreach ($PROPERTIES as $name => $content) {
   echo "<meta name='$name' content=\"$content\" />";
 }
 ?>
+<meta charset="UTF-8" />
 <link rel="icon" href="<?= makePHP("/favicon.svg") ?>" type="image/svg+xml" sizes="any">

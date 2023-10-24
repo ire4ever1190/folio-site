@@ -27,3 +27,20 @@
 .mt1 {
   margin-top: 1em;
 }
+
+/*
+ * Makes the component act like a spoiler on Discord
+ * i.e. Greyed out until hovered over (Will try and make it be clicky instead someday)
+ */
+.spoiler {
+  background-color: var(--spoiler-hidden);
+  color: var(--spoiler-hidden);
+  border-radius: .3em;
+  filter: brightness(0%) /* So things like emojis are hidden */
+}
+
+.spoiler:hover {
+  background-color: var(--spoiler-shown);
+  color: white;
+  filter: brightness(100%)
+}
