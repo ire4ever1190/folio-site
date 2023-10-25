@@ -16,6 +16,9 @@ site/:
 site/%.html: %.php site/
 	php $< > $@
 
+site/sitemap.xml: sitemap.php CNAME site/
+	php $< $(HTML_FILES) > $@
+
 site/css/site.css: $(CSS)
 	@# TODO: Optimise the CSS
 	@mkdir -p site/css
@@ -26,7 +29,7 @@ site/favicon.svg: favicon.php site/
 
 pages: $(HTML_FILES)
 
-build: site/ pages $(JS_FILES) $(CSS_FILES) site/favicon.svg site/css/site.css
+build: site/ pages $(JS_FILES) $(CSS_FILES) site/favicon.svg site/css/site.css site/sitemap.xml
 	cp -r scripts site/
 	cp -r css site/
 	cp -r imgs site/
