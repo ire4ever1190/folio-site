@@ -8,13 +8,32 @@
 header("Cache-Control: no-store");
 header("Content-Type: text/event-stream");
 
-// Should I just glob it?
-$files = [
-  "index.php" => 0,
-  "meta.php" => 0,
-  "css/components.css" => 0,
-  "css/main.css" => 0
+// All input files
+$patterns = [
+  "**.php",
+  "css/**.css",
+  "imgs/**",
+  "scripts/**.js"
 ];
+
+/**
+ * Returns fileName => mtime mapping of all files
+ * that match the patterns provided
+ * @param $patterns array<string>
+ * @returns array<string, int>
+ */
+function getFiles(array $patterns): array {
+  $result = [];
+  foreach ($patterns as $pattern) {
+    foreach (glob($pattern) as $file) {
+      $result[$file] = filemtime($file);
+    }
+  }
+  return $result;
+}
+
+// Build initial state
+$files = getFiles($patterns);
 
 while (true) {
   $needsReload = false;
@@ -23,13 +42,17 @@ while (true) {
   echo 'data: {"time": "' . $curDate . '"}';
   echo "\n\n";
   // See if any file has changed
-  foreach ($files as $file => $mtime) {
+  foreach (getFiles($patterns) as $file => $mtime) {
+    // Makes it reload if the file is new
+    $mtime = $files[$file] ?? 0;
     $newMTime = filemtime($file);
-    $files[$file] = $newMTime;
-    # See if it changes, but ignore the initial state
-    if ($mtime < $newMTime && $mtime != 0) {
+    if ($mtime < $newMTime) {
       $needsReload = true;
+      // We don't break so that we update all the modification times.
+      // This way we don't run into constant reloads if a few
+      // files were changed
     }
+    $files[$file] = $newMTime;
   }
   // If so, send an event
   if ($needsReload) {
@@ -39,5 +62,5 @@ while (true) {
   flush();
 
   if (connection_aborted()) exit();
-  sleep(1);
+  sleep(3);
 }
