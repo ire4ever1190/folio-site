@@ -60,7 +60,7 @@ const SOCIALS = [
         wanted to make a career out of it</p>
 </section>
 <section class="card centre mt1" style="width: 30vw">
-    <h2>Stuff I've learnt</h2>
+    <h2>Education</h2>
     <p>I do <abbr title="Computer Science">CS</abbr> at <abbr title="Royal Melbourne Insitute of Technology">RMIT</abbr> (TODO: make this past tense when I graduate) and have worked on assignments that
        have introduced me to technologies such as</p>
     <ul>
