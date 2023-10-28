@@ -10,7 +10,7 @@ jobs:
       - name: Install dependencies 🤓
         run: |
           sudo apt update -y
-          sudo apt install php closure-compiler -y
+          sudo apt install php openjdk-11-jre-headless -y
 
       - name: Get the code 💅
         uses: actions/checkout@v4

@@ -35,6 +35,7 @@ const SOCIALS = [
     <?php endif ?>
 </head>
 <body>
+<canvas id="stars"></canvas>
 <section class="card centre" style="width: 10vw">
     <h1 class="align-centre">Hello</h1>
     <img id="handWave" src="imgs/hand.svg" alt="Yellow splayed hand, palm facing forward"/>
@@ -86,4 +87,8 @@ const SOCIALS = [
 <script>
     console.log("Look at the source code here (https://github.com/ire4ever1190/folio-site/) instead of attempting to look at the minified stuff")
 </script>
+<?php if (IS_DEBUG): ?>
+<!-- Will enable when finished -->
+<script src="scripts/stars.js"></script>
+<?php endif ?>
 </html>

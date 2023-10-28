@@ -18,6 +18,15 @@ h1 {
   font-size: 4em;
 }
 
+/**
+ * Makes the stars canvas element be hidden
+ * in the background
+ */
+#stars {
+  z-index: -1;
+  position: absolute;
+}
+
 a:any-link {
   color: inherit;
   text-decoration-color: var(--grabby);

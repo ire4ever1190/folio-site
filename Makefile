@@ -30,20 +30,31 @@ site/favicon.svg: favicon.php site/
 pages: $(HTML_FILES)
 
 build: site/ pages $(JS_FILES) $(CSS_FILES) site/favicon.svg site/css/site.css site/sitemap.xml
-	cp -r scripts site/
 	cp -r css site/
 	cp -r imgs site/
 
-site/%.js: %.js
+
+site/%.js: %.js closure-compiler.jar
 	@# Currently playing it safe by doing each file individually
 	@# Might see if doing all at once is worthwhile once I have
-	@# a few files
-	closure-compiler -O ADVANCED $^ --js_output_file $@
+	@# a few files.
+	mkdir -p $(@D)
+	java -jar closure-compiler.jar -O ADVANCED $< --js_output_file $@
 
 
 clean:
 	rm -rf build
 	rm -rf site
+	rm -rf closure-compiler.jar
 
 serve: ## Development server
 	PHP_CLI_SERVER_WORKERS=4 php -S 127.0.0.1:8080
+
+#
+# Dependencies:
+#
+
+CLOSC_VER ?= v20230802
+
+closure-compiler.jar:
+	curl https://repo1.maven.org/maven2/com/google/javascript/closure-compiler/$(CLOSC_VER)/closure-compiler-$(CLOSC_VER).jar -o $@
