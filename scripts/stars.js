@@ -58,6 +58,7 @@ class Star {
 
     /**
      * Creates a randomly positioned/moving star
+     * @nosideeffects
      * @return {!Star}
      */
     static randomStar() {
@@ -128,6 +129,7 @@ const drawStars = (ctx, pos) => {
 }
 
 /**
+ * @nosideeffects
  * @param {number} min Smallest number (inclusive)
  * @param {number} max Highest number (exclusive)
  * @return {number} Random number in the range given
@@ -137,6 +139,8 @@ const randNum = (min, max) => {
 }
 
 /**
+ * Gets the size of the webpage i.e. the full page, not just whats visible
+ * @nosideeffects
  * @return {{width: number, height: number}}
  */
 const getPageSize = () => {
@@ -159,6 +163,7 @@ const setCanvasSize = (canvas) => {
 
 /**
  * Creates a list of stars with positions randomly placed around the screen
+ * @nosideeffects
  * @param {number} n
  * @return {!Array<!Star>}
  */
@@ -177,6 +182,7 @@ setCanvasSize(canvas)
 window.addEventListener("resize", () => setCanvasSize(canvas))
 
 const stars = createStars(10)
+
 /**
  * Time last frame was called
  * @type {number}
