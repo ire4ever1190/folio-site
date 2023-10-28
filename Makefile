@@ -16,7 +16,7 @@ site/:
 site/%.html: %.php site/
 	php $< > $@
 
-site/sitemap.xml: sitemap.php CNAME site/
+site/sitemap.xml: sitemap.php CNAME $(HTML_FILES)
 	php $< $(HTML_FILES) > $@
 
 site/css/site.css: $(CSS)
