@@ -82,13 +82,13 @@ const SOCIALS = [
     </ul>
 </section>
 </body>
-<!-- We only want hot reload when developing -->
-<?= IS_DEBUG ? "<script src='scripts/reload.js'></script>" : "" ?>
+<?php if (IS_DEBUG): ?>
+    <!-- Put anything debug related here. Won't be loaded in production -->
+    <!-- We only want hot reload when developing -->
+    <script src='scripts/reload.js'></script>
+<?php endif ?>
 <script>
     console.log("Look at the source code here (https://github.com/ire4ever1190/folio-site/) instead of attempting to look at the minified stuff")
 </script>
-<?php if (IS_DEBUG): ?>
-<!-- Will enable when finished -->
 <script src="scripts/stars.js"></script>
-<?php endif ?>
 </html>

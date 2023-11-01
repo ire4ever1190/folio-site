@@ -10,7 +10,7 @@ const ctx =  /** @type{!CanvasRenderingContext2D} */ (canvas.getContext("2d"))
  * TODO: Maybe make this be a font relative unit?
  * @type {number}
  */
-const STAR_SIZE = 10
+const STAR_SIZE = 2
 
 /**
  * Units a second to move the stars
@@ -20,10 +20,19 @@ const STAR_SIZE = 10
 const STAR_SPEED = 150
 
 /**
+ * Max distance stars can be away from each other
+ * before lines stop getting drawn.
+ * This should be the squared difference so that
+ * we don't perform an unneeded sqrt
+ * @type {number}
+ */
+const MAX_DIST = Math.pow(350, 2)
+
+/**
  * What colour to use for stars
  * @type {string}
  */
-const STAR_COLOUR = "#FF0000"
+const STAR_COLOUR = "#000000"
 
 /**
  * Multiply a degree by this to convert it to radians
@@ -113,18 +122,44 @@ class Star {
 }
 
 /**
+ * @param {!Vector} a
+ * @param {!Vector} b
+ * @returns {number} Squared euclidean distance between `a` and `b`
+ */
+const sqrDistance = (a, b) => {
+    return Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2)
+}
+
+/**
  * Draws a star on the canvas
  * @param {!CanvasRenderingContext2D} ctx
- * @param {!Array<!Star>} pos
+ * @param {!Array<!Star>} stars
  */
-const drawStars = (ctx, pos) => {
+const drawStars = (ctx, stars) => {
     const {width, height} = getPageSize()
     ctx.clearRect(0, 0, width, height)
     ctx.fillStyle = STAR_COLOUR
-    // TODO: Centre the stars
-    // TODO: Draw lines
-    for (const star of pos) {
-        ctx.fillRect(star.x, star.y, STAR_SIZE, STAR_SIZE)
+    for (let i = 0; i < stars.length; ++i) {
+        const star = stars[i]
+        ctx.beginPath()
+        // Draw the star
+        ctx.arc(star.x,star.y, STAR_SIZE, 0, 2 * Math.PI)
+        ctx.fill()
+        // We also need to draw the lines between them if they are close enough.
+        // Start looping on the next star to remove duplicate calculations (Also makes
+        // it look smoother)
+        for (let j = i + 1; j < stars.length; ++j) {
+            const other = stars[j]
+            if (star === other) continue
+            const dist = sqrDistance(star.position, other.position)
+            if (dist <= MAX_DIST) {
+                // Add alpha so that the lines slowly disappear
+                ctx.strokeStyle = `rgba(0, 0, 0, ${1 - dist / MAX_DIST})`
+                ctx.moveTo(star.x, star.y)
+                ctx.lineTo(other.x, other.y)
+            }
+        }
+        ctx.stroke()
     }
 }
 
@@ -146,7 +181,7 @@ const randNum = (min, max) => {
 const getPageSize = () => {
     const elem = document.documentElement
     return {
-        width: elem.scrollWidth,
+        width: elem.clientWidth,
         height: elem.scrollHeight
     }
 }
@@ -181,7 +216,7 @@ const createStars = (n) => {
 setCanvasSize(canvas)
 window.addEventListener("resize", () => setCanvasSize(canvas))
 
-const stars = createStars(10)
+const stars = createStars(30)
 
 /**
  * Time last frame was called
@@ -205,5 +240,8 @@ const step = (time) => {
     requestAnimationFrame(step)
 }
 
-requestAnimationFrame(step)
+// Only enable the stars if the user is fine with animations
+if (window.matchMedia("not (prefers-reduced-motion)")) {
+    requestAnimationFrame(step)
+}
 
