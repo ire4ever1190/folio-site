@@ -86,7 +86,6 @@ class Star {
      * @param {number} delta Time difference between checks
      */
     updatePos(delta) {
-        const {width, height} = getPageSize()
         // Normalise the speed
         const speed = STAR_SPEED * (delta / 1000)
         // Move in current direction
@@ -96,10 +95,10 @@ class Star {
         // change direction.
         // TODO: Just make there be gravity on the edges so that
         // the star curves back, like Dan did in astroboids
-        if (this.position.x < 0 || this.position.x > width) {
+        if (this.position.x < 0 || this.position.x > pageWidth) {
             this.direction.x *= -1
         }
-        if (this.position.y < 0 || this.position.y > height) {
+        if (this.position.y < 0 || this.position.y > pageHeight) {
             this.direction.y *= -1
         }
     }
@@ -122,6 +121,46 @@ class Star {
 }
 
 /**
+ * Gets the size of the webpage i.e. the full page, not just whats visible
+ * @nosideeffects
+ * @return {{width: number, height: number}}
+ */
+const getPageSize = () => {
+    const elem = document.documentElement
+    return {
+        width: elem.clientWidth,
+        height: elem.scrollHeight
+    }
+}
+
+/**
+ * Updates the size of a canvas
+ * @param {!HTMLElement} canvas
+ * @param {number} width
+ * @param {number} height
+ */
+const setCanvasSize = (canvas, width, height) => {
+    canvas.width = width
+    canvas.height = height
+}
+
+
+// `clientWidth` is very slow so we cache the page size
+// and update it whenever the window resizes
+let {width: pageWidth, height: pageHeight} = getPageSize()
+
+// Resize the canvas and then make sure the canvas catches
+// any future resizes
+setCanvasSize(canvas, pageWidth, pageHeight)
+window.addEventListener("resize", () => {
+    // Update our cached value
+    const {width, height} = getPageSize()
+    pageWidth = width
+    pageHeight = height
+    setCanvasSize(canvas, width, height)
+})
+
+/**
  * @param {!Vector} a
  * @param {!Vector} b
  * @returns {number} Squared euclidean distance between `a` and `b`
@@ -136,8 +175,7 @@ const sqrDistance = (a, b) => {
  * @param {!Array<!Star>} stars
  */
 const drawStars = (ctx, stars) => {
-    const {width, height} = getPageSize()
-    ctx.clearRect(0, 0, width, height)
+    ctx.clearRect(0, 0, pageWidth, pageHeight)
     ctx.fillStyle = STAR_COLOUR
     for (let i = 0; i < stars.length; ++i) {
         const star = stars[i]
@@ -174,29 +212,6 @@ const randNum = (min, max) => {
 }
 
 /**
- * Gets the size of the webpage i.e. the full page, not just whats visible
- * @nosideeffects
- * @return {{width: number, height: number}}
- */
-const getPageSize = () => {
-    const elem = document.documentElement
-    return {
-        width: elem.clientWidth,
-        height: elem.scrollHeight
-    }
-}
-
-/**
- * Updates the size of a canvas to be the same size as the webpage
- * @param {!HTMLElement} canvas
- */
-const setCanvasSize = (canvas) => {
-    const {width, height} = getPageSize()
-    canvas.width = width
-    canvas.height = height
-}
-
-/**
  * Creates a list of stars with positions randomly placed around the screen
  * @nosideeffects
  * @param {number} n
@@ -211,10 +226,7 @@ const createStars = (n) => {
     return result
 }
 
-// Resize the canvas and then make sure the canvas catches
-// any future resizes
-setCanvasSize(canvas)
-window.addEventListener("resize", () => setCanvasSize(canvas))
+
 
 const stars = createStars(30)
 
