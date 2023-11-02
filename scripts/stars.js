@@ -67,7 +67,6 @@ class Star {
 
     /**
      * Creates a randomly positioned/moving star
-     * @nosideeffects
      * @return {!Star}
      */
     static randomStar() {
@@ -92,14 +91,21 @@ class Star {
         this.position.x += this.direction.x * speed
         this.position.y += this.direction.y * speed
         // Perform collisions checks and see if we need to
-        // change direction.
+        // change direction. The need for two branches instead of *= -1
+        // is because sometimes it clips out and that would cause it to
+        // get stuck
         // TODO: Just make there be gravity on the edges so that
         // the star curves back, like Dan did in astroboids
-        if (this.position.x < 0 || this.position.x > pageWidth) {
-            this.direction.x *= -1
+        if (this.position.x < 0) {
+            this.direction.x = 1
+        } else if (this.position.x > pageWidth) {
+            this.direction.x = -1
         }
-        if (this.position.y < 0 || this.position.y > pageHeight) {
-            this.direction.y *= -1
+
+        if (this.position.y < 0) {
+            this.direction.y = 1
+        } else if (this.position.y > pageHeight) {
+            this.direction.y = -1
         }
     }
 
