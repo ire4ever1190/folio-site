@@ -36,7 +36,9 @@
   background-color: var(--spoiler-hidden);
   color: var(--spoiler-hidden);
   border-radius: .3em;
-  filter: brightness(0%) /* So things like emojis are hidden */
+  filter: brightness(0%); /* So things like emojis are hidden */
+  transition-property: color, background-color, filter;
+  transition-duration: .4s
 }
 
 .spoiler:hover {
