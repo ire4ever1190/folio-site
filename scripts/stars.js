@@ -47,6 +47,18 @@ const DEG2RAD = Math.PI / 180
 var Vector;
 
 /**
+ * @param {number} num Number to clamp
+ * @param {number} min Minimum value of allowed range (inclusive)
+ * @param {number} max Maximum value of allowed range (inclusive)
+ * @returns {number} `num` clamped to the range provided
+ */
+const clamp = (num, min, max) => {
+    if (num < min) return min
+    if (num > max) return max
+    return num
+}
+
+/**
  * A star just represents the current position + direction
  * of a star. Handles updating position, doesn't handle drawing
  * since that requires a global view of all the stars
@@ -88,29 +100,24 @@ class Star {
         // Normalise the speed
         const speed = STAR_SPEED * (delta / 1000)
         // Move in current direction
-        this.position.x += this.direction.x * speed
-        this.position.y += this.direction.y * speed
+        this.x = clamp(this.x + this.direction.x * speed, 0, pageWidth)
+        this.y = clamp(this.y + this.direction.y * speed, 0, pageHeight)
         // Perform collisions checks and see if we need to
-        // change direction. The need for two branches instead of *= -1
-        // is because sometimes it clips out and that would cause it to
-        // get stuck
+        // change direction
         // TODO: Just make there be gravity on the edges so that
         // the star curves back, like Dan did in astroboids
-        if (this.position.x < 0) {
-            this.direction.x = 1
-        } else if (this.position.x > pageWidth) {
-            this.direction.x = -1
+        if (this.x <= 0 || this.x >= pageWidth) {
+            this.direction.x *= -1
         }
 
-        if (this.position.y < 0) {
-            this.direction.y = 1
-        } else if (this.position.y > pageHeight) {
-            this.direction.y = -1
+        if (this.y <= 0 || this.y >= pageHeight) {
+            this.direction.y *= -1
         }
     }
 
     /**
      * X position of the star
+     * @nosideeffects
      * @return {number}
      */
     get x() {
@@ -118,11 +125,28 @@ class Star {
     }
 
     /**
+     * Sets the X coordinate
+     * @param {number} val
+     */
+    set x(val) {
+        this.position.x = val
+    }
+
+    /**
      * Y position of the star
+     * @nosideeffects
      * @return {number}
      */
     get y() {
         return this.position.y
+    }
+
+    /**
+     * Sets the Y coordinate
+     * @param {number} val
+     */
+    set y(val) {
+        this.position.y = val
     }
 }
 
