@@ -1,5 +1,7 @@
 <?php
 
+require_once "../utils.php";
+
 /**
  * @template C Key used for colours
  */
@@ -25,8 +27,10 @@ class Frame {
      * @param C $colour Key of colour (Stored in GIF object)
      */
     function set(int $x, int $y, mixed $colour): void {
-        if ($x < 0 || $x > $this->width) throw new RangeException("X coordinate out of range");
-        if ($y < 0 || $y > $this->height) throw new RangeException("Y coordinate out of range");
+        if (!inRange($x, 0, $this->width - 1))
+            throw new RangeException("X coordinate out of range");
+        if (!inRange($y, 0, $this->height - 1))
+            throw new RangeException("Y coordinate out of range");
         $this->data[$x][$y] = $colour;
     }
 }
