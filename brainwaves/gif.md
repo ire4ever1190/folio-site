@@ -189,6 +189,37 @@ left-right, top-bottom. Although its not just raw bytes, its LZW encoded.
 
 ##### LZW Encoding
 
-This is kinda tricky so this section is mostly just me trying to figure it out.
-Seems to be like huffman in that bits represent patterns? Not too sure if a pattern
-is a single byte or a sequence though
+> I ended up reading the [original paper](https://courses.cs.duke.edu/spring03/cps296.5/papers/ziv_lempel_1977_universal_algorithm.pdf). Boring af, no cool pictures
+
+After looking at my old algorithms notes, appendix F in the GIF spec, [some class notes from Columbia CS3137](https://www.cs.columbia.edu/~allen/S14/NOTES/lzw.pdf), and the wiki page for LZW I think I understand it.
+Basically you keep finding substrings and adding them to your mapping table. So compression
+is ass early on, but gets better as the sub-sequence is find more times. Also has the nicety
+of not needing to send the mapping table in the data since the decoder can rebuild it itself (Exercise left to the viewer).
+
+Here is the algorithm. **code word** means the index in the mapping table
+
+
+1. Create mapping of number -> indexes in our colour table (So basically just copy our normal colour table)
+2. Initialise *S* with our first index 
+3. If there is no input left, goto 7
+4. Read a character *C* from the input
+5. If *S + C* is in the mapping then add *C* to *S* and go to 3
+6. Otherwise, output codeword for *S*, add *S + C* to the table, make *S* be *C* and go to 3
+7. Output codeword for *S*
+
+Step 5 is basically how we reuse subsequences since we aren't emitting any more info (we compress it).
+Step 6 adds a new subsequence and emits something and then lets us reuse the current subsequence if we
+find it again. Now I will start building this and then get to the variable length stuff
+
+
+Block seems to be like
+
+- Number specifying number of bits needed (**codesize**). This increases as more bits are required. W3 says this is basically the same as number of bits required for colours (Guess a pattern is a colour then). Except black and white requires 2, and kinda mentions everything needs 1 extra?
+- Then a bunch of data sub blocks
+- Then null terminator
+
+Algorithm is also slightly different to the standard LZW. A clear code is there
+that resets everything (equal to 2^codesize). Also an end of image code which is the clear code + 1.
+Something about first available code is clear code + 2?
+
+Unlike huffman, there is no need to send the mapping table since it rebuilds that

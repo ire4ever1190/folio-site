@@ -61,7 +61,7 @@ class GIF {
      */
     public function build(): string {
         // Write the header
-        $res = "GIF89a";
+        $res = "GIF89a-";
 
         // Start logical screen section
         // Now for width and height
@@ -98,7 +98,11 @@ class GIF {
         $res .= "\x00"; // Don't care about the local colour table
 
         // Time to encode B)
+        foreach ($this->frames as $frame) {
+            for ($i = 0; $i <)
+        }
 
+        $res .= "\x3B"; // Trailer to show GIF is done
         return $res;
     }
 }
