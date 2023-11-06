@@ -6,18 +6,27 @@ require_once "../utils.php";
  * @template C Key used for colours
  */
 class Frame {
-    protected int $width;
-    protected int $height;
+    readonly int $width;
+    readonly int $height;
 
     /**
-     * @var array<int, array<int, C>> Pixels in image (Coordinates is X then Y
+     * @var array<int, C>> Pixels in image (Coordinates is Y then X), stored contiguously to make compression easier
      */
     protected array $data;
 
-    function __construct(int $width, int $height) {
-        $this->width = $width;
-        $this->height = $height;
-        $this->data = [];
+    protected GIF $GIF;
+
+    /**
+     * @param GIF<C> $GIF GIF this frame belongs to
+     */
+    function __construct(GIF $GIF) {
+        // Saves some typing
+        $this->width = $GIF->width;
+        $this->height = $GIF->height;
+        // Initialise every pixel to be the background
+        // We make it just a flat array to make life easier when compressing
+        $this->data = array_fill(0, $this->height * $this->width, $GIF->background);
+        $this->GIF = $GIF;
     }
 
     /**
@@ -31,6 +40,84 @@ class Frame {
             throw new RangeException("X coordinate out of range");
         if (!inRange($y, 0, $this->height - 1))
             throw new RangeException("Y coordinate out of range");
-        $this->data[$x][$y] = $colour;
+        if (!array_key_exists($colour, $this->GIF->colours))
+            throw new ValueError("Colour doesn't exist in colour");
+        $this->data[$this->width * $y + $x] = $colour;
+    }
+
+    /**
+     * @return string Frame encoded as image data. Performs compression needed
+     */
+    function build(): string {
+        // Start image descriptor
+        $res = "\x2C";
+        $res .= "\x00\x00"; // X position
+        $res .= "\x00\x00"; // Y position
+        $res .= pack("v", $this->width); // Width
+        $res .= pack("v", $this->height); // Height
+        $res .= "\x00"; // Don't care about the local colour table
+        // Start writing the image stream
+        $codeLength = max($this->GIF->colourBits() + 1, 2); // Think this is right
+        $res .= pack("C", $codeLength);
+        // Compress the data
+        // Special codes
+        $clearCode = pow(2, $codeLength);
+        $eoi = $clearCode + 1; // End of information
+        // Next compression code value we can use
+        $nextCode = $clearCode + 2;
+
+        // Build the compression table
+        $table = [];
+        foreach ($this->GIF->colours as $colour => $index) {
+            $table[pack("C", $index)] = $index;
+        }
+        // Now go throw the pixels, applying the compression as we go
+        $curr = pack("C", $this->GIF->getIndex($this->data[0])); // Current string (S)
+        $codes = [];
+        for ($i = 1; $i < sizeof($this->data); $i++) {
+            $next = pack("C", $this->data[$i]); // Next character (C)
+            $joined = $curr . $next;
+            if (array_key_exists($joined, $table)) {
+                $curr = $joined;
+            } else {
+                $table[$next] = $nextCode++;
+                // TODO: Write the data here to improve performance
+                $codes[] = $table[$curr];
+                // Reset our substring to the next stirng
+                $curr = $next;
+            }
+        }
+
+        // Now write all the codewords, making sure to properly pack them
+        $curr = 0; // Current byte we are packing
+        $bitsUsed = 0; // Number of bits in our current byte we have used
+        $bitsEaten = 0; // How many bits in our current code we have written
+        foreach ($codes as $code) {
+            echo bin2hex($code), ",\n";
+        }
+        echo "<br/>";
+        $compressed = "";
+        $i = 0;
+        while ($i < sizeof($codes)) {
+            // Write sub-block size if needed
+            $val = $codes[$i] >> $bitsEaten;
+            $curr |= $val << $bitsUsed;
+            $bitsEaten += min(8 - $bitsUsed, $codeLength);
+            $bitsUsed += $bitsEaten;
+            // We've made a new byte
+            if ($bitsUsed >= 8) {
+                $compressed .= pack("C", $curr & 0xFF);
+                $curr = 0;
+                $bitsUsed = 0;
+            }
+            // We have finished writing a byte
+            if ($bitsEaten >= $codeLength) {
+                $i++;
+                $bitsEaten = 0;
+            }
+        }
+        $res .= breakIntoBlocks($compressed);
+        $res .= "\x00";
+        return $res;
     }
 }

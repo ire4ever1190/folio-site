@@ -9,39 +9,54 @@ require_once "../utils.php";
  * @see Frame
  */
 class GIF {
-    public int $width;
-    public int $height;
+    readonly int $width;
+    readonly int $height;
 
     /**
      * @var array<C, string>
      */
-    public array $colours;
+    readonly array $colours;
+
+    /**
+     * Mapping of keys to indices so I can use human names
+     * @var array<C, int> Converts colour key to index into colour table
+     */
+    readonly array $mapping;
 
     /**
      * @var array<Frame> List of frames in the GIF
      */
     public array $frames;
 
+    readonly string $background;
+
     /**
+     * @param C $background
      * @param array<C, array<int>> $colours
      */
-    public function __construct(int $width, int $height, array $colours) {
+    public function __construct(int $width, int $height, array $colours, mixed $background) {
         $this->width = $width;
         $this->height = $height;
         if (sizeof($colours) > 256) {
             throw new ValueError("Too many colours >:(");
         }
+        $mapping = [];
         // Make sure every colour is properly defined.
         // Can't believe fixed sized arrays/tuples don't exist =(
-        foreach ($colours as $colour) {
+        // Also build the mapping
+        foreach ($colours as $key => $colour) {
             if (sizeof($colour) != 3)
                 throw new ValueError("Each colour must be RGB triplet");
             foreach ($colour as $value) {
                 if (!inRange($value, 0, 255))
                     throw new RangeException("Each value must be a byte");
             }
+            $mapping[$key] = sizeof($mapping);
         }
+
+        $this->mapping = $mapping;
         $this->colours = $colours;
+        $this->background = $background;
         $this->frames = [];
     }
 
@@ -51,17 +66,34 @@ class GIF {
      * @return Frame<C>
      */
     public function newFrame(): Frame {
-        $frame = new Frame($this->width, $this->height);
+        $frame = new Frame($this);
         $this->frames[] = $frame;
         return $frame;
+    }
+
+    /**
+     * @param C $colour Colour key
+     * @return int Index into colour table
+     */
+    public function getIndex(mixed $colour): int {
+        return $this->mapping[$colour];
+    }
+
+    /**
+     * Size of colour table is 2^(x + 1), this calculates x
+     */
+    public function colourBits(): int {
+        return ceil(log(sizeof($this->colours), 2)) - 1;
     }
 
     /**
      * @return string GIF binary data
      */
     public function build(): string {
+
+
         // Write the header
-        $res = "GIF89a-";
+        $res = "GIF89a";
 
         // Start logical screen section
         // Now for width and height
@@ -69,37 +101,24 @@ class GIF {
         $res .= pack("v", $this->height);
         // Build the packed info
         $packed_data = 1; // We do have a colour table
-        $packed_data = ($packed_data << 3) | 0b111; // Max resolution
+        $packed_data = ($packed_data << 3) | 0b0; // Max resolution
         $packed_data = ($packed_data << 1); // We don't sort the colours
-        // Find next power of 2, then set the size of the table to that
-        // I think this calculation is wrong and oversizes it
-        $next_pow = ceil(log(sizeof($this->colours), 2));
-        $packed_data = ($packed_data << 3) | $next_pow;
-        $res .= "\xF7";
+        // Find number of bits required to represent the colours
+        $colour_bits = $this->colourBits();
+        $packed_data = ($packed_data << 3) | $colour_bits;
+        $res .= pack("C", $packed_data);
         // Background colour. This is index into colour table
-        $res .= "\x00"; // TODO: make this configurable
+        $res .= pack("C", $this->getIndex($this->background));
         // Pixel aspect ratio
         $res .= "\x00";
 
         // Start colour table
-        // We also build a mapping to map from our keys to the indicies
-        $mapping = [];
-        foreach ($this->colours as $key => $colour) {
+        foreach ($this->colours as $colour) {
             $res .= pack("C*", $colour[0], $colour[1], $colour[2]);
-            $mapping[$key] = sizeof($mapping);
         }
 
-        // Start image descriptor
-        $res .= "\x2C";
-        $res .= "\x00\x00"; // X position
-        $res .= "\x00\x00"; // Y position
-        $res .= pack("v", $this->width); // Width
-        $res .= pack("v", $this->height); // Height
-        $res .= "\x00"; // Don't care about the local colour table
-
-        // Time to encode B)
         foreach ($this->frames as $frame) {
-            for ($i = 0; $i <)
+            $res .= $frame->build();
         }
 
         $res .= "\x3B"; // Trailer to show GIF is done
@@ -107,13 +126,27 @@ class GIF {
     }
 }
 
-$gif = new GIF(100, 100, [
-    "black" => [0, 0, 0]
-]);
+$gif = new GIF(3, 5, [
+    "black" => [0, 0, 0],
+    "white" => [255, 255, 255]
+], "white");
+
 $frame = $gif->newFrame();
-for ($i = 0; $i < 100; $i++) {
-    $frame->set($i, $i, "black");
-}
+//for ($i = 0; $i < 5; $i++) {
+//    $frame->set($i, $i, "black");
+//}
+$frame->set(0, 0, "black");
+$frame->set(1, 1, "black");
 ?>
 <p>Image</p>
 <img src="data:image/gif;base64, <?= base64_encode($gif->build()) ?>"/>
+<hr>
+<p>
+    <?=base64_encode($gif->build()) ?>
+</p>
+<p>
+    <?= chunk_split(bin2hex($gif->build()), 2, " ") ?>
+</p>
+<p>
+    47 49 46 38 37 61 03 00 05 00 80 01 00 00 00 00 ff ff ff 2c 00 00 00 00 03 00 05 00 00 02 04 44 6e a7 5b 00 3b
+</p>

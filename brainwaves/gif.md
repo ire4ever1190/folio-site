@@ -1,5 +1,6 @@
 # GIF (Pronounced "gef")
 
+
 [Open Graph protocol](https://ogp.me/) is a way for websites to specify how
 they should be rendered in an embed when shared on other pages. [Currently I use it to display a work in progress image](https://github.com/ire4ever1190/folio-site/blob/2b9d170e9d12a537b40081724081268f807180d0/meta.php#L11-L18)
 but now that the site is kinda in a decent state, I want to make it something cool (i.e. animated). [Sadly it doesn't support SVG's](https://indieweb.org/The-Open-Graph-protocol#Does_not_support_SVG_images)
@@ -209,17 +210,17 @@ Here is the algorithm. **code word** means the index in the mapping table
 
 Step 5 is basically how we reuse subsequences since we aren't emitting any more info (we compress it).
 Step 6 adds a new subsequence and emits something and then lets us reuse the current subsequence if we
-find it again. Now I will start building this and then get to the variable length stuff
-
+find it again. They are also stored as variable length codes (So we can more data for our byte). We
+squish them in, in least significant byte first order [^1]
 
 Block seems to be like
 
-- Number specifying number of bits needed (**codesize**). This increases as more bits are required. W3 says this is basically the same as number of bits required for colours (Guess a pattern is a colour then). Except black and white requires 2, and kinda mentions everything needs 1 extra?
-- Then a bunch of data sub blocks
+- Number specifying number of bits needed (**codesize**). calculated as `max(ceil(log(sizeof($this->colours), 2)), 2)` (Since needs to be 2 minimum).
+- Then a bunch of data sub blocks which are the compressed data broken up
 - Then null terminator
 
 Algorithm is also slightly different to the standard LZW. A clear code is there
 that resets everything (equal to 2^codesize). Also an end of image code which is the clear code + 1.
 Something about first available code is clear code + 2?
 
-Unlike huffman, there is no need to send the mapping table since it rebuilds that
+- [1]: <https://en.wikipedia.org/wiki/Lempel%E2%80%93Ziv%E2%80%93Welch#Packing_order> Packing order
