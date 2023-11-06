@@ -281,7 +281,8 @@ const step = (time) => {
     // Schedule another draw later
     requestAnimationFrame(step)
 }
-
+// Start the fade in process
+canvas.style.opacity = "100"
 // Only enable the stars if the user is fine with animations
 if (window.matchMedia("not (prefers-reduced-motion)")) {
     requestAnimationFrame(step)
