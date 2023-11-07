@@ -211,7 +211,10 @@ Here is the algorithm. **code word** means the index in the mapping table
 Step 5 is basically how we reuse subsequences since we aren't emitting any more info (we compress it).
 Step 6 adds a new subsequence and emits something and then lets us reuse the current subsequence if we
 find it again. They are also stored as variable length codes (So we can more data for our byte). We
-squish them in, in least significant byte first order [^1]
+squish them in, in least significant byte first order [^1].
+
+Getting the code length was tricky. Basically you start at `codesize + 1` (So that you can accomodate the clear code) and
+then increment it if after adding a value to the table, it is higher than possible
 
 Block seems to be like
 

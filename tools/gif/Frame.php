@@ -69,43 +69,47 @@ class Frame {
         // Build the compression table
         $table = [];
         foreach ($this->GIF->colours as $colour => $index) {
-            $table[pack("C", $index)] = $index;
+            $i = $this->GIF->getIndex($colour);
+            $table[pack("C", $i)] = $i;
         }
         // Now go throw the pixels, applying the compression as we go
         $curr = pack("C", $this->GIF->getIndex($this->data[0])); // Current string (S)
-        $codes = [];
+        $codes = [[$codeLength, $clearCode]]; // Codes must start with the clear code
+        $codeLength += 1;
         for ($i = 1; $i < sizeof($this->data); $i++) {
-            $next = pack("C", $this->data[$i]); // Next character (C)
+            $next = pack("C",  $this->GIF->getIndex($this->data[$i])); // Next character (C)
             $joined = $curr . $next;
             if (array_key_exists($joined, $table)) {
                 $curr = $joined;
             } else {
-                $table[$next] = $nextCode++;
+                $table[$joined] = $nextCode++;
                 // TODO: Write the data here to improve performance
-                $codes[] = $table[$curr];
+                $codes[] = [$codeLength, $table[$curr]];
+                if ($nextCode >= pow(2, $codeLength)) $codeLength++;
                 // Reset our substring to the next stirng
                 $curr = $next;
             }
         }
+        $codes[] = [$codeLength, $table[$curr]]; // Add the ending string
+        $codes[] = [$codeLength, $eoi]; // Must end with code indicating no more information
 
         // Now write all the codewords, making sure to properly pack them
         $curr = 0; // Current byte we are packing
         $bitsUsed = 0; // Number of bits in our current byte we have used
         $bitsEaten = 0; // How many bits in our current code we have written
-        foreach ($codes as $code) {
-            echo bin2hex($code), ",\n";
-        }
-        echo "<br/>";
+//        print_r($codes);
+//        echo "<br/>";
         $compressed = "";
         $i = 0;
         while ($i < sizeof($codes)) {
             // Write sub-block size if needed
-            $val = $codes[$i] >> $bitsEaten;
+            $val = $codes[$i][1] >> $bitsEaten;
+            $codeLength = $codes[$i][0];
             $curr |= $val << $bitsUsed;
             $bitsEaten += min(8 - $bitsUsed, $codeLength);
             $bitsUsed += $bitsEaten;
             // We've made a new byte
-            if ($bitsUsed >= 8) {
+            if ($bitsUsed == 8) {
                 $compressed .= pack("C", $curr & 0xFF);
                 $curr = 0;
                 $bitsUsed = 0;
