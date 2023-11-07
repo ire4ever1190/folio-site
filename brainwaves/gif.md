@@ -197,28 +197,43 @@ Basically you keep finding substrings and adding them to your mapping table. So 
 is ass early on, but gets better as the sub-sequence is find more times. Also has the nicety
 of not needing to send the mapping table in the data since the decoder can rebuild it itself (Exercise left to the viewer).
 
-Here is the algorithm. **code word** means the index in the mapping table
-
+Some special values for the algorithm
+- **codeSize**: Number of bits required to represent everything used. calculated as `max(ceil(log(sizeof($this->colours), 2)), 2)` (Since needs to be 2 minimum). Though this could be smaller if not every colour is used
+- **clearCode**: `2 ^ codesize`. Resets the decoder state.
+- **end of information code**: `clearCode + 1`. Used to show that there is nothing left
 
 1. Create mapping of number -> indexes in our colour table (So basically just copy our normal colour table)
-2. Initialise *S* with our first index 
-3. If there is no input left, goto 7
-4. Read a character *C* from the input
-5. If *S + C* is in the mapping then add *C* to *S* and go to 3
-6. Otherwise, output codeword for *S*, add *S + C* to the table, make *S* be *C* and go to 3
-7. Output codeword for *S*
+2. output the clear code
+3. Initialise *S* with our first index 
+4. If there is no input left, goto 8
+5. Read a character *C* from the input
+6. If *S + C* is in the mapping then add *C* to *S* and goto 4
+7. Otherwise, output codeword for *S*, add *S + C* to the table, make *S* be *C* and goto 4
+8. Output codeword for *S*
+9. output the end of information code 
 
 Step 5 is basically how we reuse subsequences since we aren't emitting any more info (we compress it).
 Step 6 adds a new subsequence and emits something and then lets us reuse the current subsequence if we
 find it again. They are also stored as variable length codes (So we can more data for our byte). We
 squish them in, in least significant byte first order [^1].
 
-Getting the code length was tricky. Basically you start at `codesize + 1` (So that you can accomodate the clear code) and
-then increment it if after adding a value to the table, it is higher than possible
+Getting the code length was tricky. Basically you start at `codesize + 1` (So that you can accommodate the clear code) and
+then increment it if the next code is larger than the current largest integer possible (Wiki says increment when its equal, but doing that messed it up for me). 
+This is the outline of the algorithm in the end
+
+1. Initialise codelength to `clearCode + 2`
+2. Perform steps as normal
+3. When in step 7, after incrementing and outputting check if *nextCode > 2^codeLength*. If it is then increment the code length
+
+For writing out the information, I have a semi scuffed system where I keep track
+of the current bits used in the byte and bits written from the current output. Seem PHP code
+for more details cause I don't want to explain it.
+
+After a bunch of hand calculations and checking against a GIF made in GIMP, I was able to get it working.
 
 Block seems to be like
 
-- Number specifying number of bits needed (**codesize**). calculated as `max(ceil(log(sizeof($this->colours), 2)), 2)` (Since needs to be 2 minimum).
+- Number specifying number of bits needed (**codesize**). 
 - Then a bunch of data sub blocks which are the compressed data broken up
 - Then null terminator
 

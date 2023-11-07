@@ -74,8 +74,8 @@ class Frame {
         }
         // Now go throw the pixels, applying the compression as we go
         $curr = pack("C", $this->GIF->getIndex($this->data[0])); // Current string (S)
-        $codes = [[$codeLength, $clearCode]]; // Codes must start with the clear code
         $codeLength += 1;
+        $codes = [[$codeLength, $clearCode]]; // Codes must start with the clear code
         for ($i = 1; $i < sizeof($this->data); $i++) {
             $next = pack("C",  $this->GIF->getIndex($this->data[$i])); // Next character (C)
             $joined = $curr . $next;
@@ -85,7 +85,8 @@ class Frame {
                 $table[$joined] = $nextCode++;
                 // TODO: Write the data here to improve performance
                 $codes[] = [$codeLength, $table[$curr]];
-                if ($nextCode >= pow(2, $codeLength)) $codeLength++;
+                if ($nextCode > pow(2, $codeLength))
+                    $codeLength++;
                 // Reset our substring to the next stirng
                 $curr = $next;
             }
@@ -97,8 +98,7 @@ class Frame {
         $curr = 0; // Current byte we are packing
         $bitsUsed = 0; // Number of bits in our current byte we have used
         $bitsEaten = 0; // How many bits in our current code we have written
-//        print_r($codes);
-//        echo "<br/>";
+
         $compressed = "";
         $i = 0;
         while ($i < sizeof($codes)) {
@@ -106,8 +106,10 @@ class Frame {
             $val = $codes[$i][1] >> $bitsEaten;
             $codeLength = $codes[$i][0];
             $curr |= $val << $bitsUsed;
-            $bitsEaten += min(8 - $bitsUsed, $codeLength);
-            $bitsUsed += $bitsEaten;
+            $remaining = $codeLength - $bitsEaten;
+            $used = min(8 - $bitsUsed, $remaining);
+            $bitsEaten += $used;
+            $bitsUsed += $used;
             // We've made a new byte
             if ($bitsUsed == 8) {
                 $compressed .= pack("C", $curr & 0xFF);

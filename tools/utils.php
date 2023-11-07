@@ -45,3 +45,12 @@ function breakIntoBlocks(string $data): string {
     }
     return $res;
 }
+
+/**
+ * Compresses a string using LZW
+ * @param int $initialBits Number of bits required to represent every value in the alphabet
+ * @return string Compressed data
+ */
+function compressLZW(string $data, int $initialBits): string {
+
+}
