@@ -49,28 +49,28 @@ function breakIntoBlocks(string $data): string {
 
 /**
  * Compresses a series of colour table indices.
- * Now this code isn't the most performant, but I did try to sneak optimisations in such as
- * using the minimum required number of bits so we don't inflate the size too much (I care more about
- * file size since this is all ran when compiling the site, not at runtime)
+ * Code isn't the most performant, but it only runs at compile time so should be fine
  *
  * TODO: Support Resetting state once 12 bits is reached
  *
  * @param non-empty-array<int> $data Array of indexes into the colour table
  * @return string Compressed data as LZW code blocks
  */
-function compressLZW(array $data): string {
+function compressLZW(array $data, int $bits): string {
     // Find the initial bits required by seeing how many distinctive values there are
 
 
     // Build the initial codes table. Since the indices
-    // map to themselves we can do it like this. We can
-    // then use the size of this table to determine the number of bits required
+    // map to themselves we can do it like this.
     $table = [];
+    $highestValue = 0;
     foreach ($data as $value) {
         $table[pack("C", $value)] = $value;
+        $highestValue = max($value, $highestValue);
     }
-    // Either the nearest power of 2, or 2
-    $initialCodeLength = max(ceil(log(sizeof($table), 2)), 2);
+    // Either the nearest power of 2, or 2.
+    // Needs to be able to fit the largest number
+    $initialCodeLength = max($bits, 2);
 
     // Now go throw the pixels, applying the compression as we go
     $curr = ""; // Current string (S)
@@ -146,4 +146,11 @@ function compressLZW(array $data): string {
     $writeVariableLength($eoi, true); // Must end with code indicating no more information
 
     return pack("C", $initialCodeLength) . breakIntoBlocks($res);
+}
+
+/**
+ * @return float $val clamped into the range
+ */
+function clamp(float $min, float $max, float $val): float {
+    return max($min, min($max, $val));
 }

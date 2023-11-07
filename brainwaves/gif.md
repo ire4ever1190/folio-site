@@ -231,14 +231,50 @@ for more details cause I don't want to explain it.
 
 After a bunch of hand calculations and checking against a GIF made in GIMP, I was able to get it working.
 
-Block seems to be like
+We then write out the block data which is
 
-- Number specifying number of bits needed (**codesize**). 
+- Initial bits needed (*codeSize*) 
 - Then a bunch of data sub blocks which are the compressed data broken up
-- Then null terminator
 
-Algorithm is also slightly different to the standard LZW. A clear code is there
-that resets everything (equal to 2^codesize). Also an end of image code which is the clear code + 1.
-Something about first available code is clear code + 2?
+After adding the trailer character (;) there is now enough code to make an image
+
+![Just a line](helloline.gif).
+
+### Animation
+
+Now the bulk of the application is done, so we can now add animation to move between the 
+frames. Funnily enough GIF wasn't actually designed with animation in mind, it was just something
+that was tacked on (Spec I followed didn't show how to do it, needed the wiki page).
+
+First step in making the GIF animated is adding a **Graphics Control Extension** block
+before each frame. The fields are
+
+- Extension introducer, always `0x21`
+- Identifier, always `0xF9`
+- Block Size, always 4
+- Packed data byte
+  - 3 bits are reserved
+  - 3 bits are the dispoal method
+    - 0, no disposal
+    - 2, restore background colour,
+    - 3, restore area that was overwritten,
+    - undefined
+  - 1 bit flag, frame wont continue til user provides input
+  - 1 bit flag, transparent colour flag. Allows you to specify an index that will be treated as transparent
+- Unsigned integer specifying delay time (in centiseconds)
+- Byte specifying the index that is a transparent colour (Ignored if transparency not set)
+- null byte terminator
+
+This allows me to get an animation going (Same line, just flips through the colours).
+Although the animation only runs once, so I need to use another extension
+to make it loop forever (Thank the net navigators!). This is basically just hardcoded
+values that I copied from wikipedia
+
+### Results
+
+Since its now working, I added a few drawing helpers (lines, circles, shapes) and
+made these animations
+
+# References
 
 - [1]: <https://en.wikipedia.org/wiki/Lempel%E2%80%93Ziv%E2%80%93Welch#Packing_order> Packing order
