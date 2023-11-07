@@ -56,74 +56,8 @@ class Frame {
         $res .= pack("v", $this->width); // Width
         $res .= pack("v", $this->height); // Height
         $res .= "\x00"; // Don't care about the local colour table
-        // Start writing the image stream
-        $codeLength = max($this->GIF->colourBits() + 1, 2); // Think this is right
-        $res .= pack("C", $codeLength);
-        // Compress the data
-        // Special codes
-        $clearCode = pow(2, $codeLength);
-        $eoi = $clearCode + 1; // End of information
-        // Next compression code value we can use
-        $nextCode = $clearCode + 2;
-
-        // Build the compression table
-        $table = [];
-        foreach ($this->GIF->colours as $colour => $index) {
-            $i = $this->GIF->getIndex($colour);
-            $table[pack("C", $i)] = $i;
-        }
-        // Now go throw the pixels, applying the compression as we go
-        $curr = pack("C", $this->GIF->getIndex($this->data[0])); // Current string (S)
-        $codeLength += 1;
-        $codes = [[$codeLength, $clearCode]]; // Codes must start with the clear code
-        for ($i = 1; $i < sizeof($this->data); $i++) {
-            $next = pack("C",  $this->GIF->getIndex($this->data[$i])); // Next character (C)
-            $joined = $curr . $next;
-            if (array_key_exists($joined, $table)) {
-                $curr = $joined;
-            } else {
-                $table[$joined] = $nextCode++;
-                // TODO: Write the data here to improve performance
-                $codes[] = [$codeLength, $table[$curr]];
-                if ($nextCode > pow(2, $codeLength))
-                    $codeLength++;
-                // Reset our substring to the next stirng
-                $curr = $next;
-            }
-        }
-        $codes[] = [$codeLength, $table[$curr]]; // Add the ending string
-        $codes[] = [$codeLength, $eoi]; // Must end with code indicating no more information
-
-        // Now write all the codewords, making sure to properly pack them
-        $curr = 0; // Current byte we are packing
-        $bitsUsed = 0; // Number of bits in our current byte we have used
-        $bitsEaten = 0; // How many bits in our current code we have written
-
-        $compressed = "";
-        $i = 0;
-        while ($i < sizeof($codes)) {
-            // Write sub-block size if needed
-            $val = $codes[$i][1] >> $bitsEaten;
-            $codeLength = $codes[$i][0];
-            $curr |= $val << $bitsUsed;
-            $remaining = $codeLength - $bitsEaten;
-            $used = min(8 - $bitsUsed, $remaining);
-            $bitsEaten += $used;
-            $bitsUsed += $used;
-            // We've made a new byte
-            if ($bitsUsed == 8) {
-                $compressed .= pack("C", $curr & 0xFF);
-                $curr = 0;
-                $bitsUsed = 0;
-            }
-            // We have finished writing a byte
-            if ($bitsEaten >= $codeLength) {
-                $i++;
-                $bitsEaten = 0;
-            }
-        }
-        $res .= breakIntoBlocks($compressed);
-        $res .= "\x00";
-        return $res;
+        // Start writing the compressed image stream
+        $data = array_map(fn (mixed $key) => $this->GIF->getIndex($key), $this->data);
+        return $res . compressLZW($data);
     }
 }

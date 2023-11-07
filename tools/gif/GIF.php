@@ -126,17 +126,15 @@ class GIF {
     }
 }
 
-$gif = new GIF(3, 5, [
+$gif = new GIF(50, 50, [
     "black" => [0, 0, 0],
     "white" => [255, 255, 255]
 ], "white");
 
 $frame = $gif->newFrame();
-//for ($i = 0; $i < 5; $i++) {
-//    $frame->set($i, $i, "black");
-//}
-$frame->set(0, 0, "black");
-$frame->set(1, 1, "black");
+for ($i = 0; $i < 50; $i++) {
+    $frame->set($i, $i, "black");
+}
 ?>
 <p>Image</p>
 <img src="data:image/gif;base64, <?= base64_encode($gif->build()) ?>"/>
