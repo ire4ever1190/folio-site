@@ -11,23 +11,34 @@ class Frame {
     readonly int $height;
 
     /**
-     * @var array<int, C>> Pixels in image (Coordinates is Y then X), stored contiguously to make compression easier
+     * @var array<int, int>> Pixels in image (Coordinates is Y then X), stored contiguously to make compression easier.
      */
     protected array $data;
 
-    protected GIF $GIF;
+    protected GIFBuilder $GIF;
 
     /**
-     * @param GIF<C> $GIF GIF this frame belongs to
+     * @param GIFBuilder<C> $GIF GIF this frame belongs to
      */
-    function __construct(GIF $GIF) {
+    function __construct(GIFBuilder $GIF) {
         // Saves some typing
         $this->width = $GIF->width;
         $this->height = $GIF->height;
         // Initialise every pixel to be the background
         // We make it just a flat array to make life easier when compressing
-        $this->data = array_fill(0, $this->height * $this->width, $GIF->background);
+        $backIndex = $GIF->getIndex($GIF->background);
+        $this->data = array_fill(0, $this->height * $this->width, $backIndex);
         $this->GIF = $GIF;
+    }
+
+    /**
+     * Sets the pixel like set, except its a no-op if the pixel is out of bounds
+     * @see set
+     */
+    function setRaw(int $x, int $y, mixed $colour): void {
+        if (!inRange($x, 0, $this->width - 1)) return;
+        if (!inRange($y, 0, $this->height - 1)) return;
+        $this->data[$this->width * $y + $x] = $this->GIF->getIndex($colour);
     }
 
     /**
@@ -43,7 +54,19 @@ class Frame {
             throw new RangeException("Y coordinate out of range");
         if (!array_key_exists($colour, $this->GIF->colours))
             throw new ValueError("'$colour' doesn't exist in table");
-        $this->data[$this->width * $y + $x] = $colour;
+        $this->setRaw($x, $y, $colour);
+    }
+
+    /**
+     * Resets the data in the frame so no pixels are set.
+     * This can be used so the frame can be reused instead of allocating
+     * a new frame
+     */
+    public function reset(): void {
+        $backIndex = $this->GIF->getIndex($this->GIF->background);
+        for ($i = 0; $i < count($this->data); $i++) {
+            $this->data[$i] = $backIndex;
+        }
     }
 
     /**
@@ -72,10 +95,10 @@ class Frame {
         // Draw time
         do {
             // Draw the quadrants
-            $this->set($pos->x - $x, $pos->y + $y, $colour);
-            $this->set($pos->x - $y, $pos->y - $x, $colour);
-            $this->set($pos->x + $x, $pos->y - $y, $colour);
-            $this->set($pos->x + $y, $pos->y + $x, $colour);
+            $this->setRaw($pos->x - $x, $pos->y + $y, $colour);
+            $this->setRaw($pos->x - $y, $pos->y - $x, $colour);
+            $this->setRaw($pos->x + $x, $pos->y - $y, $colour);
+            $this->setRaw($pos->x + $y, $pos->y + $x, $colour);
 
             $radius = $err;
             if ($radius <= $y) $err += ++$y * 2 + 1;
@@ -94,54 +117,15 @@ class Frame {
         // Basically rewrote the C code in PHP, its just funky maths.
         // Slightly modified to make it work without anti aliasing. Basically
         // I only draw the sides if they meet a threshold
-        $x0 = $a->x;
-        $x1 = $b->x;
-        $y0 = $a->y;
-        $y1 = $b->y;
+        $diff = $a->sub($b)->abs();
 
-        $dx = abs($x0 - $x1);
-        $dy = abs($y0 - $y1);
+        $steps = max($diff->x, $diff->y);
+        $inc = $diff->div($steps);
+        $curr = clone $a;
 
-        $sx = $x0 < $x1 ? 1 : -1;
-        $sy = $y0 < $y1 ? 1 : -1;
-        $err = $dx - $dy;
-        $ed = $dx + $dy == 0 ? 1 : $a->dist($b);
-
-        $wd = ($width + 1) / 2;
-
-        while (true) {
-            // Draw the main part of the line
-            $this->set($x0, $y0, $colour);
-            $e2 = $err;
-            $x2 = $x0;
-
-            // Function which returns if the vibe is right to draw
-            $doDraw = function () use (&$e2, $ed, $wd): bool {
-                return (abs($e2) / $ed - $wd + 1) > .98; // Magic threshold
-            };
-            // Draw width extensions on X axis
-            if (2 * $e2 >= -$dx) {
-                $e2 += $dy;
-                $y2 = $y0;
-                for (; $e2 < $ed * $wd && ($y1 != $y2 || $dx > $dy); $e2 += 2) {
-                    if ($doDraw()) $this->set($x0, $y2 += $sy, $colour);
-                }
-                if ($x0 == $x1) break;
-                $e2 = $err;
-                $err -= $dy;
-                $x0 += $sx;
-            }
-            // Draw width extensions on Y axis
-            if (2 * $e2 <= $dy) {
-                $e2 = $dx - $e2;
-                for (; $e2 < $ed * $wd && ($x1 != $x2 || $dx < $dy); $e2 += $dy) {
-                    if ($doDraw()) $this->set($x2 += $sx, $y0, $colour);
-                }
-                if ($y0 == $y1) break;
-                $err += $dx;
-                $y0 += $sy;
-            }
-
+        for ($i = 0; $i < $steps; $i++) {
+            $this->setRaw($curr->x, $curr->y, $colour);
+            $curr->addEq($inc);
         }
     }
 
@@ -157,7 +141,7 @@ class Frame {
         $res .= pack("v", $this->height); // Height
         $res .= "\x00"; // Don't care about the local colour table
         // Start writing the compressed image stream
-        $data = array_map(fn(mixed $key) => $this->GIF->getIndex($key), $this->data);
-        return $res . compressLZW($data, $this->GIF->colourBits() + 1);
+        $res .= compressLZW($this->data, $this->GIF->colourBits() + 1);
+        return $res;
     }
 }

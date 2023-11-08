@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 require_once "Frame.php";
 require_once "../utils.php";
 
@@ -8,7 +9,7 @@ require_once "../utils.php";
  * @template C Key used for colours
  * @see Frame
  */
-class GIF {
+class GIFBuilder {
     readonly int $width;
     readonly int $height;
 
@@ -24,7 +25,7 @@ class GIF {
     readonly array $mapping;
 
     /**
-     * @var array<Frame> List of frames in the GIF
+     * @var array<string> List of frames in the GIF (Stored as compressed frame)
      */
     public array $frames;
 
@@ -61,14 +62,19 @@ class GIF {
     }
 
     /**
-     * Constructs a new frame and adds it to the list of frames.
-     * You perform modifications on the frame returned
+     * Constructs a new frame. Add the frame later with addFrame
      * @return Frame<C>
+     * @see addFrame
      */
     public function newFrame(): Frame {
-        $frame = new Frame($this);
-        $this->frames[] = $frame;
-        return $frame;
+        return new Frame($this);
+    }
+
+    /**
+     * Adds a frame to the GIF
+     */
+    public function addFrame(Frame $frame): void {
+        $this->frames[] = $frame->build();
     }
 
     /**
@@ -83,14 +89,14 @@ class GIF {
      * Size of colour table is 2^(x + 1), this calculates x
      */
     public function colourBits(): int {
-        return ceil(log(sizeof($this->colours), 2)) - 1;
+        return (int) ceil(log(sizeof($this->colours), 2)) - 1;
     }
 
 
     /**
      * @return string GIF binary data
      */
-    public function build(): string {
+    public function build(int $delay = 16): string {
 
 
         // Write the header
@@ -129,19 +135,17 @@ class GIF {
 
         foreach ($this->frames as $frame) {
             // First write the graphics control extension
-            if (true) {
-                $res .= "\x21\xF9\x04"; // Header data that is always the same
-                // Now build the packed info
-                // Just set the disposal to restore the background
-                // TODO: Support transparency
-                $res .= pack("C", 0b00001000);
-                // 1 second delay (TODO: Make this configurable)
-                $res .= pack("v", 50);
-                $res .= "\x00\x00";
-            }
+            $res .= "\x21\xF9\x04"; // Header data that is always the same
+            // Now build the packed info
+            // Just set the disposal to restore the background
+            // TODO: Support transparency
+            $res .= pack("C", 0b00001000);
+            // 1 second delay (TODO: Make this configurable)
+            $res .= pack("v", $delay);
+            $res .= "\x00\x00";
 
             // Now write the frame
-            $res .= $frame->build();
+            $res .= $frame;
         }
 
         $res .= "\x3B"; // Trailer to show GIF is done
@@ -149,7 +153,7 @@ class GIF {
     }
 }
 
-$gif = new GIF(200, 200, [
+$gif = new GIFBuilder(200, 200, [
     "black" => [0, 0, 0],
     "white" => [255, 255, 255],
     "red" => [255, 0, 0],
@@ -171,8 +175,8 @@ class Star {
         $dir = deg2rad(random_int(0, 359));
 
         return new Star(
-                new Vector2D(random_int(0, $gif->width - 1), random_int(0, $gif->height - 1)),
-                new Vector2D(cos($dir), sin($dir))
+            new Vector2D(random_int(0, $gif->width - 1), random_int(0, $gif->height - 1)),
+            (new Vector2D(cos($dir), sin($dir)))->mul(1)
         );
     }
 }
@@ -181,28 +185,46 @@ class Star {
  * @type $dots array<Star>
  */
 $dots = [];
-for ($i = 0; $i < 6; $i++) {
+const NUM_DOTS = 20;
+for ($i = 0; $i < NUM_DOTS; $i++) {
     $dots[] = Star::random();
 }
+$frame = $gif->newFrame();
+$zero = Vector2D::zero();
 
-for ($i = 0; $i < 3; $i++) {
-    $frame = $gif->newFrame();
-    // Draw each star and lines between them
-    for ($i = 0; $i < count($dots); $i++) {
+function drawDots(Frame $frame, array $dots) {
+    for ($i = 0; $i < NUM_DOTS; $i++) {
         $star = $dots[$i];
         $frame->drawCircleOutline($star->pos, 3, "black");
-        for ($j = $i + 1; $j < count($dots); $j++) {
-            if ($j == $i) continue;
+        for ($j = $i + 1; $j < NUM_DOTS; $j++) {
             $other = $dots[$j];
-            if ($star->pos->dist($other->pos) < 10) {
+            if ($star->pos == $other->pos) continue;
+            if ($star->pos->sqrDist($other->pos) < 250) {
                 $frame->drawLine($star->pos, $other->pos, 1, "black");
             }
         }
     }
+}
+
+for ($l = 0; $l < 50; $l++) {
+    // Draw each star and lines between them
+    drawDots($frame, $dots);
     // Update the positions of each star
     foreach ($dots as $dot) {
-        $dot->pos = $dot->pos->add($dot->dir->mul(50))->clamp(Vector2D::zero(), $frame->maxPos());
+        $dot->pos->addEq($dot->dir)->clampEq($zero, $frame->maxPos());
+        // Bounce if needed
+        $x = $dot->pos->x;
+        $y = $dot->pos->y;
+
+        if ($x == 0 || $x == $frame->maxPos()->x) {
+            $dot->dir->x *= -1;
+        }
+        if ($y == 0 || $y == $frame->maxPos()->y) {
+            $dot->dir->y *= -1;
+        }
     }
+    $gif->addFrame($frame);
+    $frame->reset();
 }
 ?>
 <p>Image</p>

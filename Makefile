@@ -1,6 +1,12 @@
 
 .PHONY: pages serve clean build
 
+PHP_FLAGS ?= \
+	-dopcache.enable=1 \
+	-dopcache.enable_cli=1 \
+	-dopcache.jit_buffer_size=256M \
+	-dopcache.jit=tracing
+
 # Inputs
 PAGES  := index.php
 JS := $(shell find scripts/ -not -name reload.js)
@@ -48,7 +54,7 @@ clean:
 	rm -rf closure-compiler.jar
 
 serve: ## Development server
-	PHP_CLI_SERVER_WORKERS=4 php -S 127.0.0.1:8080
+	PHP_CLI_SERVER_WORKERS=4 php $(PHP_FLAGS) -S 127.0.0.1:8080
 
 #
 # Dependencies:

@@ -31,7 +31,7 @@ is some classes like so
 
 ```php
 <?php
-class GIF {
+class GIFBuilder {
     public int $width;
     public int $height;
     /**
@@ -71,9 +71,10 @@ The code structure I ended up with is sorta like that, except it doesn't have `a
 just return the frame and add it to the internal array. It references it so its fine).
 With that done I will now try to get this snippet running (Renders directly to an image to
 make testing easier)
+
 ```php
 <?php
-$gif = new GIF(100, 100, [
+$gif = new GIFBuilder(100, 100, [
     "black" => "#000000"
 ]);
 $frame = $gif->newFrame();
@@ -269,6 +270,25 @@ This allows me to get an animation going (Same line, just flips through the colo
 Although the animation only runs once, so I need to use another extension
 to make it loop forever (Thank the net navigators!). This is basically just hardcoded
 values that I copied from wikipedia
+
+### Improvements
+
+Now after that I started on some animations but very quickly
+ran into some problems (Memory). Each frame was about 1MB for 
+a 200 by 200 image so I very quickly was running out of memory (PHP by default
+only allows a max of 128MB, very easy to increase though).
+
+The improvements I did was store the frames as their compressed data instead of the full frame,
+and also reused the frame object so I wasn't making a new one every frame. That allowed
+me to pass the memory issues, but now I was getting performance problems with high number of frames
+(This made developing slow, and my fans fast). So I fired up
+the profiler to see what was causing the slowdown (I suspect my shitty `Vector2D` class). From the profiler, these were my improvments
+- Store the indexes instead of the colour key, saved memory and removed expensive `array_map` call
+- Optimised `Frame->build()` since that was the slowest
+  - Cache the max value we can store, shaved about 400ms off
+  - Moving the code out of the closure didn't help (Guess screwed with the JIT)
+  - Enable the JIT, turns out its not enabled by default (This made it zoom)
+  - Fix line drawing which was causing infinite loops
 
 ### Results
 

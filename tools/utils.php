@@ -47,13 +47,46 @@ function breakIntoBlocks(string $data): string {
     return $res;
 }
 
+function writeVariableLength(int $val, int $codeLength, string &$res, int &$currByte, int &$bitsUsed, bool $final = false) {
+    $bitsEaten = 0; // How many bits in our current code we have written
+    while (true) {
+        // Remove the bits we have used
+        $val = $val >> $bitsEaten;
+        // Add them to the current byte (Make sure to move into correct position
+        // so we don't overwrite previous codes
+        $currByte |= $val << $bitsUsed;
+        // Update our state
+        $remaining = $codeLength - $bitsEaten;
+        $used = min(8 - $bitsUsed, $remaining);
+        $bitsEaten += $used;
+        $bitsUsed += $used;
+        // See if we need to reset the state
+
+        // Moving onto a new byte
+        if ($bitsUsed == 8) {
+            $res .= pack("C", $currByte & 0xFF);
+            $currByte = 0;
+            $bitsUsed = 0;
+        }
+        // We have finished writing a byte
+        if ($bitsEaten >= $codeLength) {
+            // If this is the final code, then make sure to flush
+            // the current byte
+            if ($final && $bitsUsed > 0) {
+                $res .= pack("C", $currByte & 0xFF);
+            }
+            break;
+        }
+    }
+}
+
 /**
  * Compresses a series of colour table indices.
  * Code isn't the most performant, but it only runs at compile time so should be fine
  *
  * TODO: Support Resetting state once 12 bits is reached
  *
- * @param non-empty-array<int> $data Array of indexes into the colour table
+ * @param array<int> $data Array of indexes into the colour table
  * @return string Compressed data as LZW code blocks
  */
 function compressLZW(array $data, int $bits): string {
@@ -88,6 +121,7 @@ function compressLZW(array $data, int $bits): string {
     $res = "";
 
     // Helper function to write variable length codes
+    // Helper function to write variable length codes
     $writeVariableLength = function (int $code, $final = false) use (&$res, &$bitsUsed, &$currByte, &$codeLength): void {
         $bitsEaten = 0; // How many bits in our current code we have written
         while (true) {
@@ -121,29 +155,48 @@ function compressLZW(array $data, int $bits): string {
         }
     };
 
+    // Store the max value we can store.
+    // Once the $nextCode goes over this, we increment the $codeLength
+    $maxValue = pow(2, $codeLength);
+
+    // Starts with the clear code
+//    writeVariableLength($clearCode, $codeLength, $res, $currByte, $bitsUsed);
     $writeVariableLength($clearCode); // Has to start with clear code
-    foreach ($data as $value) {
-        $next = pack("C", $value); // Next character (C)
+
+
+    $length = count($data);
+    for ($i = 0; $i < $length; ++$i) {
+        $next = pack("C", $data[$i]); // Next character (C)
         $joined = $curr . $next;
-        if (array_key_exists($joined, $table)) {
+        if (isset($table[$joined])) {
             // Just continue with the substring
             $curr = $joined;
         } else {
             // Write code for previous substring, and learn the new
             // substring for later
             $table[$joined] = $nextCode++;
-            // TODO: Write the data here to improve performance
+
+//            writeVariableLength($table[$curr], $codeLength, $res, $currByte, $bitsUsed);
             $writeVariableLength($table[$curr]);
-            if ($nextCode > pow(2, $codeLength)) {
+
+            // Increment code length if we need more bits to write
+            // the next code
+            if ($nextCode > $maxValue) {
                 $codeLength++;
+                $maxValue *= 2;
                 assert($codeLength < 13); // Alert me if I need to actually implement this
             }
-            // Reset our substring to the next stirng
+            // Reset our substring to the next string
             $curr = $next;
         }
     }
+//    writeVariableLength($table[$curr], $codeLength, $res, $currByte, $bitsUsed); // Add the ending string
+
+//    writeVariableLength($eoi, $codeLength, $res, $currByte, $bitsUsed, true); // Must end with code indicating no more information
+
     $writeVariableLength($table[$curr]); // Add the ending string)
     $writeVariableLength($eoi, true); // Must end with code indicating no more information
+
 
     return pack("C", $initialCodeLength) . breakIntoBlocks($res);
 }
