@@ -161,67 +161,68 @@ $gif = new GIFBuilder(200, 200, [
     "blue" => [0, 0, 255]
 ], "white");
 
-class Star {
-    public Vector2D $pos;
-    public Vector2D $dir;
+const DIST = 50;
+const MID_POINT = 100;
+const LOW = MID_POINT - DIST;
+const HIGH = MID_POINT + DIST;
 
-    public function __construct(Vector2D $pos, Vector2D $dir) {
-        $this->pos = $pos;
+const SPEED = 1;
+
+define("FRAMES", intdiv(DIST * 4, SPEED));
+
+class Dot {
+    public float $x;
+    public int $dir;
+
+    public function __construct(float $x, int $dir) {
+        $this->x = $x;
         $this->dir = $dir;
     }
 
-    static function random(): Star {
-        global $gif;
-        $dir = deg2rad(random_int(0, 359));
-
-        return new Star(
-            new Vector2D(random_int(0, $gif->width - 1), random_int(0, $gif->height - 1)),
-            (new Vector2D(cos($dir), sin($dir)))->mul(1)
-        );
+    public function pos(): Vector2D {
+        return new Vector2D($this->x, sin($this->x) * MID_POINT);
     }
 }
 
 /**
- * @type $dots array<Star>
+ * @type $dots array<Dot>
  */
-$dots = [];
-const NUM_DOTS = 20;
-for ($i = 0; $i < NUM_DOTS; $i++) {
-    $dots[] = Star::random();
-}
+$dots = [
+    new Dot(MID_POINT, 1),
+    new Dot(LOW,1),
+    new Dot(HIGH, -1)
+];
+define("NUM_DOTS", count($dots));
 $frame = $gif->newFrame();
 $zero = Vector2D::zero();
 
-function drawDots(Frame $frame, array $dots) {
+/**
+ * @param array<Dot> $dots
+ */
+function drawDots(Frame $frame, array $dots): void {
     for ($i = 0; $i < NUM_DOTS; $i++) {
-        $star = $dots[$i];
-        $frame->drawCircleOutline($star->pos, 3, "black");
+        $dot = $dots[$i];
+        $pos = $dot->pos();
+        $frame->drawCircleOutline($pos, 3, "black");
         for ($j = $i + 1; $j < NUM_DOTS; $j++) {
             $other = $dots[$j];
-            if ($star->pos == $other->pos) continue;
-            if ($star->pos->sqrDist($other->pos) < 250) {
-                $frame->drawLine($star->pos, $other->pos, "black");
+            $otherPos = $other->pos();
+            if ($dot->x == $other->x) continue;
+            if ($pos->sqrDist($otherPos) < 250) {
+                $frame->drawLine($pos, $otherPos, "black");
             }
         }
     }
 }
 
-for ($l = 0; $l < 50; $l++) {
+for ($l = 0; $l < FRAMES; $l++) {
     // Draw each star and lines between them
     drawDots($frame, $dots);
     // Update the positions of each star
     foreach ($dots as $dot) {
-        $dot->pos->addEq($dot->dir)->clampEq($zero, $frame->maxPos());
-        // Bounce if needed
-        $x = $dot->pos->x;
-        $y = $dot->pos->y;
-
-        if ($x == 0 || $x == $frame->maxPos()->x) {
-            $dot->dir->x *= -1;
-        }
-        if ($y == 0 || $y == $frame->maxPos()->y) {
-            $dot->dir->y *= -1;
-        }
+        // We doing the salsa
+        $dot->x = clamp(LOW, HIGH, $dot->x + $dot->dir * SPEED);
+        if ($dot->x == LOW || $dot->x == HIGH) $dot->dir *= -1;
     }
     $gif->addFrame($frame);
     $frame->reset();
