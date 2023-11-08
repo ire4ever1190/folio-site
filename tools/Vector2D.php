@@ -32,8 +32,8 @@ class Vector2D {
     /**
      * Subtracts two vectors
      */
-    public function sub(Vector2D|int $other): Vector2D {
-        if (gettype($other) == "integer") {
+    public function sub(Vector2D|float $other): Vector2D {
+        if (gettype($other) == "double") {
             return new Vector2D($this->x - $other, $this->y - $other);
         } else {
             return new Vector2D($this->x - $other->x, $this->y - $other->y);

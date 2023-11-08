@@ -200,7 +200,7 @@ function drawDots(Frame $frame, array $dots) {
             $other = $dots[$j];
             if ($star->pos == $other->pos) continue;
             if ($star->pos->sqrDist($other->pos) < 250) {
-                $frame->drawLine($star->pos, $other->pos, 1, "black");
+                $frame->drawLine($star->pos, $other->pos, "black");
             }
         }
     }

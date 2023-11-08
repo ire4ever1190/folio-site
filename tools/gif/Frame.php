@@ -108,24 +108,40 @@ class Frame {
     }
 
     /**
-     * Draws a line between $a and $b of a certain $width. I don't do any anti-aliasing since
+     * Draws a line between $a and $b. I don't do any anti-aliasing since
      * we don't have many colours to work with
+     * TODO: Support width
      * @param C $colour
-     * @see http://members.chello.at/~easyfilter/bresenham.html
+     * @see https://www.baeldung.com/cs/bresenhams-line-algorithm
      */
-    function drawLine(Vector2D $a, Vector2D $b, int $width, mixed $colour): void {
-        // Basically rewrote the C code in PHP, its just funky maths.
-        // Slightly modified to make it work without anti aliasing. Basically
-        // I only draw the sides if they meet a threshold
-        $diff = $a->sub($b)->abs();
+    function drawLine(Vector2D $a, Vector2D $b, mixed $colour): void {
+        $x0 = floor($a->x);
+        $y0 = floor($a->y);
+        $x1 = floor($b->x);
+        $y1 = floor($b->y);
+        $dx = abs($x1 - $x0);
+        $dy = abs($y1 - $y0);
 
-        $steps = max($diff->x, $diff->y);
-        $inc = $diff->div($steps);
-        $curr = clone $a;
 
-        for ($i = 0; $i < $steps; $i++) {
-            $this->setRaw($curr->x, $curr->y, $colour);
-            $curr->addEq($inc);
+        $sx = $x0 < $x1 ? 1 : -1;
+        $sy = $y0 < $y1 ? 1 : -1;
+
+        $e = ($dx > $dy ? $dx : -$dy) / 2;
+
+        while (true) {
+            $this->setRaw($x0, $y0, $colour);
+            if ($x0 == $x1 && $y0 == $y1)
+                break;
+
+            $e2 = $e;
+            if ($e2 > -$dx) {
+                $e -= $dy;
+                $x0 += $sx;
+            }
+            if ($e2 < $dy) {
+                $e += $dx;
+                $y0 += $sy;
+            }
         }
     }
 
