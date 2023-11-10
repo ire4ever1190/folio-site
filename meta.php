@@ -13,8 +13,8 @@ $PROPERTIES = [
     "og:url" => "https://leahy.dev",
     "og:image" => "https://leahy.dev/imgs/banner.gif",
     "og:image:type" => "image/gif",
-    "og:image:width" => "200",
-    "og:image:height" => "200",
+    "og:image:width" => "50",
+    "og:image:height" => "50",
     "og:image:alt" => "Dots moving in a figure of 8",
     "og:description" => "A random site with random stuff (about Jake (Me))"
 ];

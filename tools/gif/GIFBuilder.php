@@ -29,7 +29,7 @@ class GIFBuilder {
      */
     public array $frames;
 
-    readonly string $background;
+    readonly mixed $background;
 
     /**
      * @param C $background
