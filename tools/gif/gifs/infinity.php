@@ -17,7 +17,7 @@ const MID_POINT = 100;
 const LOW = MID_POINT - DIST;
 const HIGH = MID_POINT + DIST;
 
-const SPEED = 1;
+const SPEED = 2;
 
 define("FRAMES", intdiv(DIST * 4, SPEED));
 
@@ -25,13 +25,14 @@ class Dot {
     public float $x;
     public int $dir;
 
+
     public function __construct(float $x, int $dir) {
         $this->x = $x;
         $this->dir = $dir;
     }
 
     public function pos(): Vector2D {
-        return new Vector2D($this->x, MID_POINT + sin($this->x) * 5);
+        return new Vector2D($this->x, MID_POINT + sin((M_PI / DIST) * $this->x) * (DIST/3) * $this->dir);
     }
 }
 
@@ -47,6 +48,9 @@ define("NUM_DOTS", count($dots));
 $frame = $gif->newFrame();
 $zero = Vector2D::zero();
 
+const COLOURS = ["red", "green", "blue"];
+
+
 /**
  * @param array<Dot> $dots
  */
@@ -54,15 +58,16 @@ function drawDots(Frame $frame, array $dots): void {
     for ($i = 0; $i < NUM_DOTS; $i++) {
         $dot = $dots[$i];
         $pos = $dot->pos();
-        $frame->drawCircleOutline($pos, 3, "black");
         for ($j = $i + 1; $j < NUM_DOTS; $j++) {
             $other = $dots[$j];
             $otherPos = $other->pos();
             if ($dot->x == $other->x) continue;
-            if ($pos->sqrDist($otherPos) < 250) {
+            if ($pos->sqrDist($otherPos) < 10000) {
                 $frame->drawLine($pos, $otherPos, "black");
             }
         }
+        // Draw circle so it appears over the lines
+        $frame->drawCircleOutline($pos, 3, COLOURS[$i]);
     }
 }
 
