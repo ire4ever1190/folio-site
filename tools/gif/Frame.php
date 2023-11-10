@@ -1,7 +1,7 @@
 <?php
 
-require_once "../utils.php";
-require_once "../Vector2D.php";
+require_once __DIR__."/../utils.php";
+require_once __DIR__ ."/../Vector2D.php";
 
 /**
  * @template C Key used for colours

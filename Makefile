@@ -6,6 +6,7 @@ PHP_FLAGS ?= \
 	-dopcache.enable_cli=1 \
 	-dopcache.jit_buffer_size=256M \
 	-dopcache.jit=tracing
+PHP_CMD = php $(PHP_FLAGS)
 
 # Inputs
 PAGES  := index.php
@@ -20,10 +21,10 @@ site/:
 	mkdir -p site/
 
 site/%.html: %.php site/
-	php $< > $@
+	$(PHP_CMD) $< > $@
 
 site/sitemap.xml: sitemap.php CNAME $(HTML_FILES)
-	php $< $(HTML_FILES) > $@
+	$(PHP_CMD) $< $(HTML_FILES) > $@
 
 site/css/site.css: $(CSS)
 	@# TODO: Optimise the CSS
@@ -31,11 +32,15 @@ site/css/site.css: $(CSS)
 	cat $^ > $@
 
 site/favicon.svg: favicon.php site/
-	php $< > $@
+	$(PHP_CMD) $< > $@
+
+site/imgs/banner.gif: tools/gif/gifs/infinity.php tools/gif/Frame.php tools/gif/GIFBuilder.php
+	mkdir -p site/imgs/
+	$(PHP_CMD) $< > $@
 
 pages: $(HTML_FILES)
 
-build: site/ pages $(JS_FILES) $(CSS_FILES) site/favicon.svg site/css/site.css site/sitemap.xml
+build: site/ pages $(JS_FILES) $(CSS_FILES) site/favicon.svg site/css/site.css site/sitemap.xml site/imgs/banner.gif
 	cp -r css site/
 	cp -r imgs site/
 
