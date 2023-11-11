@@ -34,7 +34,7 @@ site/css/site.css: $(CSS)
 site/favicon.svg: favicon.php site/
 	$(PHP_CMD) $< > $@
 
-site/imgs/banner.gif: tools/gif/gifs/life.php tools/gif/Frame.php tools/gif/GIFBuilder.php
+site/imgs/banner.gif: tools/gif/gifs/life.php tools/gif/GIFBuilder.php
 	mkdir -p site/imgs/
 	$(PHP_CMD) $< > $@
 

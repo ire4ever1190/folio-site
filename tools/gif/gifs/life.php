@@ -7,7 +7,6 @@
 header("Content-type: image/gif");
 
 require_once __DIR__."/../GIFBuilder.php";
-require_once __DIR__."/../Frame.php";
 
 /**
  * Size of the board
@@ -125,14 +124,12 @@ const CELLS = [
 ];
 
 $gif = new GIFBuilder(SIZE, SIZE, COLOURS, 0);
-$frame = $gif->newFrame();
 // First ease them in
 foreach (COLOURS as $colour => $val) {
     foreach (CELLS as [$x, $y]) {
-        $frame->set($x, $y, $colour);
+        $gif->set($x, $y, $colour);
     }
-    $gif->addFrame($frame);
-    $frame->reset();
+    $gif->write();
 }
 
 $board = new Life();
@@ -151,12 +148,11 @@ for ($i = 0; $i < FRAMES; $i++) {
     $count = 0;
     for ($y = 0; $y < SIZE; ++$y) {
         for ($x = 0; $x < SIZE; ++$x) {
-            $frame->set($x, $y, $board->get($x, $y));
+            $gif->set($x, $y, $board->get($x, $y));
             $count += $board->get($x, $y);
         }
     }
 
-    $gif->addFrame($frame);
-    $frame->reset();
+    $gif->write();
 }
 echo $gif->build(delay: 9);

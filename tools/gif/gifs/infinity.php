@@ -2,7 +2,6 @@
 header("Content-type: image/gif");
 
 require_once __DIR__."/../GIFBuilder.php";
-require_once __DIR__."/../Frame.php";
 
 $gif = new GIFBuilder(200, 200, [
     "black" => [0, 0, 0],
@@ -45,7 +44,6 @@ $dots = [
     new Dot(HIGH, -1)
 ];
 define("NUM_DOTS", count($dots));
-$frame = $gif->newFrame();
 $zero = Vector2D::zero();
 
 const COLOURS = ["red", "green", "blue"];
@@ -54,7 +52,7 @@ const COLOURS = ["red", "green", "blue"];
 /**
  * @param array<Dot> $dots
  */
-function drawDots(Frame $frame, array $dots): void {
+function drawDots(GIFBuilder $gif, array $dots): void {
     for ($i = 0; $i < NUM_DOTS; $i++) {
         $dot = $dots[$i];
         $pos = $dot->pos();
@@ -63,25 +61,24 @@ function drawDots(Frame $frame, array $dots): void {
             $otherPos = $other->pos();
             if ($dot->x == $other->x) continue;
             if ($pos->sqrDist($otherPos) < 10000) {
-                $frame->drawLine($pos, $otherPos, "black");
+                $gif->drawLine($pos, $otherPos, "black");
             }
         }
         // Draw circle so it appears over the lines
-        $frame->drawCircleOutline($pos, 3, COLOURS[$i]);
+        $gif->drawCircleOutline($pos, 3, COLOURS[$i]);
     }
 }
 
 for ($l = 0; $l < FRAMES; $l++) {
     // Draw each star and lines between them
-    drawDots($frame, $dots);
+    drawDots($gif, $dots);
     // Update the positions of each star
     foreach ($dots as $dot) {
         // We doing the salsa
         $dot->x = clamp(LOW, HIGH, $dot->x + $dot->dir * SPEED);
         if ($dot->x == LOW || $dot->x == HIGH) $dot->dir *= -1;
     }
-    $gif->addFrame($frame);
-    $frame->reset();
+    $gif->write();
 }
 define("IS_DEBUG", php_sapi_name() !== 'cli');
 echo $gif->build();
