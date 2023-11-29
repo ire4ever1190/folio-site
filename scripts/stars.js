@@ -221,13 +221,14 @@ const drawStars = (ctx, stars) => {
             if (star === other) continue
             const dist = sqrDistance(star.position, other.position)
             if (dist <= MAX_DIST) {
+                ctx.beginPath()
                 // Add alpha so that the lines slowly disappear
                 ctx.strokeStyle = `rgba(0, 0, 0, ${1 - dist / MAX_DIST})`
                 ctx.moveTo(star.x, star.y)
                 ctx.lineTo(other.x, other.y)
+                ctx.stroke()
             }
         }
-        ctx.stroke()
     }
 }
 
