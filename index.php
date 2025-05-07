@@ -48,37 +48,10 @@ const SOCIALS = [
 </section>
 <section class="card centre mt1" style="width: 30vw">
     <h2>About Me</h2>
-    <p>You could probably tell by the tagline before but I'm Jake. I'm a normal human <span class="spoiler">(not a robot 🤖)</span>  who
-       enjoys walks, <span title="Mainly Sci-Fi">reading</span>, watching <span title="TODO: Pay cat tax">my cats</span> loaf
-       and of course, programming.</p>
-     <p>I got into programming as a hobby around the middle of highschool when I used it for small tasks like</p>
-     <ul>
-         <li>Automated messages for when data usage was too high</li>
-         <li>Displaying my timetable in a <a href="https://www.rainmeter.net/">Rainmeter</a> widget</li>
-         <li>Calculating my average school results</li>
-     </ul>
-     <p>And from there I just kept programming and doing random stuff until eventually I decided I
-        wanted to make a career out of it</p>
-</section>
-<section class="card centre mt1" style="width: 30vw">
-    <h2>Education</h2>
-    <p>I got my bachelor's of <abbr title="Computer Science">CS</abbr> at <abbr title="Royal Melbourne Insitute of Technology">RMIT</abbr> in 2023 and worked on assignments that introduced me to technologies such as</p>
-    <ul>
-        <li>Java</li>
-        <li>JavaScript (and Typescript)</li>
-        <li>Assorted web (CSS, HTML)</li>
-        <li>PHP</li>
-        <li>C++</li>
-        <li>SQL (And sadly also <a href="https://en.wikipedia.org/wiki/PL/SQL">PL/SQL</a>)
-        <li>LaTeX (secret bullet for reports)</li>
-    </ul>
-    <p>And skills such as</p>
-    <ul>
-      <li>SDLC techniques such as agile and SCRUM</li>
-      <li>Team work 🫂</li>
-      <li>Git</li>
-      <li>How to test/debug</li>
-    </ul>
+    <p>
+        I'm a normal human <span class="spoiler">(not a robot 🤖)</span> who programs professional and as a hobby.
+        Not much else to say, but please check out my <abbr title="It's linked at the top">github</abbr> to see my personal projects
+    </p>
 </section>
 </body>
 <?php if (IS_DEBUG): ?>
