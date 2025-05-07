@@ -49,7 +49,7 @@ const SOCIALS = [
 <section class="card centre mt1" style="width: 30vw">
     <h2>About Me</h2>
     <p>
-        I'm a normal human <span class="spoiler">(not a robot 🤖)</span> who programs professional and as a hobby.
+        I'm a normal human <span class="spoiler">(not a robot 🤖)</span> who programs professionally and as a hobby.
         Not much else to say, but please check out my <abbr title="It's linked at the top">github</abbr> to see my personal projects
     </p>
 </section>
