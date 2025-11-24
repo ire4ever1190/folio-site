@@ -13,7 +13,7 @@ jobs:
           sudo apt install php openjdk-11-jre-headless -y
 
       - name: Get the code 💅
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Build site 🔨🧑‍🔧
         run: make -j2 build
