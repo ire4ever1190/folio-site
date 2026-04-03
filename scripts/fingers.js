@@ -23,3 +23,4 @@ const makeFingerElement = () => {
 const pointAt = (elem) => {
   elem.appendChild(makeFingerElement());
 };
+window["pointAt"] = pointAt;
