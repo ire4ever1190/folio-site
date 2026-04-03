@@ -1,0 +1,15 @@
+.finger {
+    position: absolute;
+    margin: 0;
+    animation: orbit linear 3s infinite;
+}
+
+@keyframes orbit {
+    from {
+        /* Perform initial rotate, then move it away from the rotation centre, then point it back at the element */
+        transform: rotate(0deg) translateX(1em) rotate(180deg);
+    }
+    to {
+        transform: rotate(360deg) translateX(1em) rotate(180deg);
+    }
+}
