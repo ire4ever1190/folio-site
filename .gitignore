@@ -2,3 +2,4 @@
 site/
 closure-compiler.jar
 cachegrind.out.*.gz
+.direnv

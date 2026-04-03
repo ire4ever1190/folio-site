@@ -7,16 +7,14 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Install dependencies 🤓
-        run: |
-          sudo apt update -y
-          sudo apt install php openjdk-11-jre-headless -y
-
       - name: Get the code 💅
         uses: actions/checkout@v6
 
+      - name: Get nix in the mix ❄️
+        uses: DeterminateSystems/determinate-nix-action@main
+
       - name: Build site 🔨🧑‍🔧
-        run: make -j2 build
+        run: nix develop -c make -j2 build
 
       - name: Fix permissions 🏥
         run: |
