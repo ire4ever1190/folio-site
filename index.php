@@ -53,7 +53,7 @@ const SOCIALS = [
     <h2>About Me</h2>
     <p>
         I'm a normal human <span class="spoiler">(not a robot 🤖)</span> who programs professionally and as a hobby.
-        Not much else to say, but please check out my <abbr title="It's linked at the top" onclick="pointAt(window.icons);">github</abbr> to see my personal projects
+        Not much else to say, but please check out my <abbr style="cursor: pointer" title="It's linked at the top" onclick="pointAt(window.icons);">github</abbr> to see my personal projects
     </p>
 </section>
 </body>
