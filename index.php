@@ -1,11 +1,17 @@
 <?php
 require_once "utils.php";
 
-const CSS_FILES = ["components.css", "main.css", "variables.css", "utils.css"];
+const CSS_FILES = [
+    "components.css",
+    "main.css",
+    "variables.css",
+    "utils.css",
+    "finger.css",
+];
 
 const SOCIALS = [
-    "https://github.com/ire4ever1190" => "github-mark.svg",
     "https://www.linkedin.com/in/yoda-/" => "linkedin.svg",
+    "https://github.com/ire4ever1190" => "github-mark.svg",
     "mailto:business@leahy.dev" => "email.svg",
 ];
 ?>
@@ -13,7 +19,7 @@ const SOCIALS = [
 <html lang="en">
 <head>
     <?php include "meta.php"; ?>
-    <title>Teehee</title>
+    <title>Leahy</title>
     <!--
         Should minimise time before text is shown.
         Should maybe also use the swap? So that the
@@ -47,7 +53,7 @@ const SOCIALS = [
     <h2>About Me</h2>
     <p>
         I'm a normal human <span class="spoiler">(not a robot 🤖)</span> who programs professionally and as a hobby.
-        Not much else to say, but please check out my <abbr title="It's linked at the top">github</abbr> to see my personal projects
+        Not much else to say, but please check out my <abbr title="It's linked at the top" onclick="pointAt(window.icons);">github</abbr> to see my personal projects
     </p>
 </section>
 </body>
@@ -60,4 +66,5 @@ const SOCIALS = [
     console.log("Look at the source code here (https://github.com/ire4ever1190/folio-site/) instead of attempting to look at the minified stuff")
 </script>
 <script src="scripts/stars.js"></script>
+<script src="scripts/fingers.js"></script>
 </html>
