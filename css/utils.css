@@ -8,7 +8,7 @@
  * Parent must have some sized defined though
  */
 .centre {
-  margin: 0 auto;
+    margin: 0 auto;
 }
 
 /**
@@ -16,7 +16,7 @@
  * for other stuff in future
  */
 .align-centre {
-  text-align: center;
+    text-align: center;
 }
 
 /*
@@ -25,7 +25,7 @@
  */
 
 .mt1 {
-  margin-top: 1em;
+    margin-top: 1em;
 }
 
 /*
@@ -33,16 +33,35 @@
  * i.e. Greyed out until hovered over (Will try and make it be clicky instead someday)
  */
 .spoiler {
-  background-color: var(--spoiler-hidden);
-  color: var(--spoiler-hidden);
-  border-radius: .3em;
-  filter: brightness(0%); /* So things like emojis are hidden */
-  transition-property: color, background-color, filter;
-  transition-duration: .4s
+    background-color: var(--spoiler-hidden);
+    color: var(--spoiler-hidden);
+    border-radius: 0.3em;
+    filter: brightness(0%); /* So things like emojis are hidden */
+    transition-property: color, background-color, filter;
+    transition-duration: 0.4s;
 }
 
 .spoiler:hover {
-  background-color: var(--spoiler-shown);
-  color: white;
-  filter: brightness(100%)
+    background-color: var(--spoiler-shown);
+    color: white;
+    filter: brightness(100%);
+}
+
+/*
+ * Bunch of random variables.
+ * Probs should just download a library
+ */
+
+.vw-10 {
+    width: 10vw;
+}
+
+.vw-30 {
+    width: 30vw;
+}
+
+@media screen and (max-width: 768px) {
+    .vw-80-m {
+        width: 80vw;
+    }
 }

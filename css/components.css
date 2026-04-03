@@ -3,13 +3,13 @@
  */
 
 .card {
-  background-color: var(--primary);
-  border-radius: 1em;
-  padding: 1em;
-  box-shadow: 12px 12px 2px 1px black;
+    background-color: var(--primary);
+    border-radius: 1em;
+    padding: 1em;
+    box-shadow: 12px 12px 2px 1px black;
 }
 
 #icons {
-  display: flex;
-  justify-content: space-around
+    display: flex;
+    justify-content: space-around;
 }

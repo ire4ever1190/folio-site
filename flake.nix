@@ -23,6 +23,7 @@
             php
             closurecompiler
             gnumake
+            clean-css-cli
           ];
         };
       }

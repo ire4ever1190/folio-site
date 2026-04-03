@@ -27,9 +27,8 @@ site/sitemap.xml: sitemap.php CNAME $(HTML_FILES)
 	$(PHP_CMD) $< $(HTML_FILES) > $@
 
 site/css/site.css: $(CSS)
-	@# TODO: Optimise the CSS
 	@mkdir -p site/css
-	cat $^ > $@
+	cleancss -o $@ $^
 
 site/favicon.svg: favicon.php site/
 	$(PHP_CMD) $< > $@
@@ -58,4 +57,4 @@ clean:
 	rm -rf site
 
 serve: ## Development server
-	PHP_CLI_SERVER_WORKERS=4 php $(PHP_FLAGS) -S 127.0.0.1:8080
+	PHP_CLI_SERVER_WORKERS=4 php $(PHP_FLAGS) -S 0.0.0.0:8080

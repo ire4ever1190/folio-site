@@ -1,7 +1,8 @@
 @font-face {
-  font-family: "Slabo";
-  src:
-    local("Slabo"), url("slabo.ttf") format("opentype")
+    font-family: "Slabo";
+    src:
+        local("Slabo"),
+        url("slabo.ttf") format("opentype");
 }
 
 /**
@@ -9,13 +10,13 @@
  */
 
 body {
-  font-family: "Slabo", serif;
-  background-color: var(--background);
-  font-size: 1.4em;
+    font-family: "Slabo", serif;
+    background-color: var(--background);
+    font-size: 1.4em;
 }
 
 h1 {
-  font-size: 4em;
+    font-size: 4em;
 }
 
 /**
@@ -23,40 +24,40 @@ h1 {
  * in the background
  */
 #stars {
-  z-index: -1;
-  position: absolute;
-  top: 0;
-  left: 0;
-  opacity: 0;
-  transition: opacity 8s;
+    z-index: -1;
+    position: absolute;
+    top: 0;
+    left: 0;
+    opacity: 0;
+    transition: opacity 8s;
 }
 
 a:any-link {
-  color: inherit;
-  text-decoration-color: var(--grabby);
+    color: inherit;
+    text-decoration-color: var(--grabby);
 }
 
 /* Put animations here */
 @media not (prefers-reduced-motion) {
-  /**
+    /**
    * Waving hand at the top of the page.
    * Just a bit of CSS to make it go back/forth
    */
-  #handWave {
-    animation: 3s infinite handwave;
-  }
+    #handWave {
+        animation: 3s infinite handwave;
+    }
 }
 
 @keyframes handwave {
-  from {
-    rotate: 0.0turn
-  }
+    from {
+        rotate: 0turn;
+    }
 
-  50% {
-    rotate: -0.2turn
-  }
+    50% {
+        rotate: -0.2turn;
+    }
 
-  to {
-    rotate: 0.0turn
-  }
+    to {
+        rotate: 0turn;
+    }
 }
